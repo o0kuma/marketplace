@@ -1,0 +1,36 @@
+# Dependencies & build
+node_modules/
+**/build/
+**/.gradle/
+**/out/
+**/.next/
+**/dist/
+
+# Local env & secrets
+.env
+.env.*
+!.env.example
+**/application-local.yml
+**/application-secret.yml
+
+# Editor / AI project metadata (optional to exclude from repo)
+.claude/
+
+# Uploads & runtime
+uploads/
+**/uploads/
+
+# IDE & OS
+.idea/
+*.iml
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Logs & coverage
+*.log
+coverage/
+.nyc_output/
+
+# Next standalone
+market-front/.next/

@@ -1,0 +1,21 @@
+# Production profile - use env vars for secrets
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    show-sql: false
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/market}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+
+app:
+  jwt:
+    secret: ${JWT_SECRET}
+    expiration-ms: ${JWT_EXPIRATION_MS:86400000}
+  upload-dir: ${APP_UPLOAD_DIR:/app/uploads}
+
+logging:
+  level:
+    root: INFO
+    org.hibernate.SQL: WARN

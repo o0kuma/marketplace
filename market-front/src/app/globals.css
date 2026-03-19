@@ -1,0 +1,107 @@
+@import "tailwindcss";
+
+/* Western / global marketplace design tokens */
+:root {
+  --market-bg: #f7f6f4;
+  --market-surface: #ffffff;
+  --market-elevated: #ffffff;
+  --market-text: #1a1a1a;
+  --market-text-muted: #6b6b6b;
+  --market-border: #e8e6e3;
+  --market-accent: #0f766e;
+  --market-accent-hover: #0d9488;
+  --market-accent-subtle: #ccfbf1;
+  --market-dark: #134e4a;
+  --shadow-market: 0 1px 3px rgba(0, 0, 0, 0.06), 0 8px 24px rgba(0, 0, 0, 0.04);
+  --shadow-market-hover: 0 4px 12px rgba(0, 0, 0, 0.08), 0 16px 40px rgba(0, 0, 0, 0.06);
+  --background: var(--market-bg);
+  --foreground: var(--market-text);
+  --card: var(--market-surface);
+  --border: var(--market-border);
+  --accent: var(--market-accent);
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+
+body {
+  background: var(--market-bg);
+  color: var(--market-text);
+  font-family: var(--font-geist-sans), system-ui, -apple-system, "Segoe UI", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  letter-spacing: -0.01em;
+  overflow-x: hidden;
+}
+
+/* Layout width for storefront */
+.market-container {
+  @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;
+}
+
+/* Cards — soft shadow, no heavy border */
+.card {
+  @apply rounded-2xl border border-[var(--market-border)] bg-[var(--market-surface)] p-6;
+  box-shadow: var(--shadow-market);
+}
+
+.card-interactive {
+  @apply transition-all duration-300 ease-out;
+}
+.card-interactive:hover {
+  box-shadow: var(--shadow-market-hover);
+  @apply border-[var(--market-border)];
+}
+
+/* Primary CTA — teal accent (global e-comm feel) */
+.btn-primary {
+  @apply inline-flex items-center justify-center rounded-full bg-[var(--market-accent)] px-6 py-3 text-sm font-semibold tracking-wide text-white transition focus-visible:outline focus-visible:ring-2 focus-visible:ring-[var(--market-accent)] focus-visible:ring-offset-2 disabled:opacity-50;
+}
+.btn-primary:hover {
+  background: var(--market-accent-hover);
+}
+
+/* Secondary — outline */
+.btn-secondary {
+  @apply inline-flex items-center justify-center rounded-full border border-[var(--market-border)] bg-white px-5 py-2.5 text-sm font-medium text-[var(--market-text)] transition hover:border-[var(--market-text-muted)] hover:bg-[var(--market-bg)] focus-visible:outline focus-visible:ring-2 focus-visible:ring-[var(--market-accent)] focus-visible:ring-offset-2 disabled:opacity-50;
+}
+
+.input-field,
+.input {
+  @apply w-full rounded-xl border border-[var(--market-border)] bg-white px-4 py-3 text-sm text-[var(--market-text)] placeholder:text-[var(--market-text-muted)] transition focus:border-[var(--market-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--market-accent-subtle)];
+}
+
+.label {
+  @apply mb-1.5 block text-xs font-semibold uppercase tracking-wider text-[var(--market-text-muted)];
+}
+
+.section-title {
+  @apply text-2xl font-semibold tracking-tight text-[var(--market-text)] sm:text-3xl;
+}
+
+.section-eyebrow {
+  @apply mb-2 text-xs font-semibold uppercase tracking-[0.2em] text-[var(--market-accent)];
+}
+
+.empty-state {
+  @apply rounded-2xl border border-dashed border-[var(--market-border)] bg-white/60 py-16 text-center text-[var(--market-text-muted)];
+}
+
+/* Product grid card — add `group` on element for group-hover children */
+.market-product-card {
+  @apply block overflow-hidden rounded-2xl bg-white transition duration-300;
+  box-shadow: var(--shadow-market);
+}
+.market-product-card:hover {
+  box-shadow: var(--shadow-market-hover);
+  transform: translateY(-2px);
+}
+
+/* Sticky checkout summary */
+.market-sticky-summary {
+  @apply rounded-2xl border border-[var(--market-border)] bg-white p-6 lg:sticky lg:top-28;
+  box-shadow: var(--shadow-market);
+}

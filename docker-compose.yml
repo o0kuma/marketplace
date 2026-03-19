@@ -1,0 +1,22 @@
+# Local PostgreSQL for marketplace API. Usage: docker compose up -d
+# Override POSTGRES_PASSWORD via env or .env file for non-local use.
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: market-postgres
+    environment:
+      POSTGRES_USER: ${POSTGRES_USER:-kuma}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-1234}
+      POSTGRES_DB: ${POSTGRES_DB:-market}
+    ports:
+      - "5432:5432"
+    volumes:
+      - market_pg_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U kuma -d market"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  market_pg_data:

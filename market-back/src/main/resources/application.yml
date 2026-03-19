@@ -1,0 +1,72 @@
+server:
+  port: 8080
+
+app:
+  jwt:
+    secret: ${JWT_SECRET:CHANGE_ME_MIN_32_CHARS_FOR_DEV_ONLY_XYZ}
+    expiration-ms: 86400000
+  upload-dir: ${user.dir}/uploads
+  # Shared secret for POST /api/webhooks/payment/confirm (header X-Webhook-Secret). Leave empty to reject webhook calls.
+  payment:
+    webhook-secret: ""
+    # Toss Payments: set secret-key (and front NEXT_PUBLIC_TOSS_CLIENT_KEY) to enable real payments. Leave empty for stub.
+    toss:
+      secret-key: ${TOSS_SECRET_KEY:}
+      client-key: ${TOSS_CLIENT_KEY:}
+  # OpenAlex (https://docs.openalex.org) — set contact-email for polite pool rate limits
+  openalex:
+    base-url: https://api.openalex.org
+    contact-email: ${OPENALEX_MAIL:}
+    search-timeout-ms: 20000
+    graph-timeout-ms: 25000
+    graph-refs-limit: 12
+    graph-cites-limit: 12
+
+  mail:
+    from: ${MAIL_FROM:noreply@market.example.com}
+  front-url: ${FRONT_URL:http://localhost:3000}
+
+market:
+  shipping:
+    free-threshold-krw: 50000
+    fee-krw: 3000
+  # Initial super admin (created only when no ADMIN exists). Set via env or application-local.yml.
+  admin:
+    email: ${INITIAL_ADMIN_EMAIL:admin@example.com}
+    password: ${INITIAL_ADMIN_PASSWORD:changeme}
+
+spring:
+  mail:
+    host: ${MAIL_HOST:}
+    port: ${MAIL_PORT:587}
+    username: ${MAIL_USERNAME:}
+    password: ${MAIL_PASSWORD:}
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+  datasource:
+    url: jdbc:postgresql://localhost:5432/market
+    username: ${DB_USERNAME:kuma}
+    # Local dev default matches docker-compose; override DB_PASSWORD in production.
+    password: ${DB_PASSWORD:1234}
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      # 엔티티 클래스를 기반으로 DB 스키마 자동 업데이트
+      ddl-auto: update
+    properties:
+      hibernate:
+        show_sql: true
+        format_sql: true
+        use_sql_comments: true
+    # 개발 단계에서 쿼리 파라미터 확인용
+    show-sql: true
+
+logging:
+  level:
+    org.hibernate.SQL: debug
+    org.hibernate.type.descriptor.sql.BasicBinder: trace
