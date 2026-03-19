@@ -1,6 +1,6 @@
 # Market Backend
 
-Spring Boot API (JPA, Security, PostgreSQL/H2).
+Spring Boot API (JPA, Security, PostgreSQL; optional H2 in-memory profile `h2`).
 
 ## 요구 사항
 
@@ -13,26 +13,22 @@ Spring Boot API (JPA, Security, PostgreSQL/H2).
 > **Gradle 태스크 이름은 `bootRun`입니다.** (`booRun` 등은 오타로 실패합니다.)  
 > Windows: `.\gradlew.bat bootRun ...`
 
-### 1) PostgreSQL 없이 (H2 메모리 DB)
+### 1) PostgreSQL 사용 (권장, DBeaver와 동일 DB)
 
-- **IDE**: `MarketApplication` 실행 시 VM 옵션에 `-Dspring.profiles.active=dev` 추가
-- **Gradle**:  
-  - Wrapper가 있다면:  
-    `./gradlew bootRun --args='--spring.profiles.active=dev'`  
-  - 로컬에 Gradle이 있다면:  
-    `gradle wrapper` 로 Wrapper 생성 후  
-    `./gradlew bootRun --args='--spring.profiles.active=dev'`
+1. 저장소 루트에서 `docker compose up -d` 로 Postgres 기동 (또는 로컬 Postgres에 DB `market` 생성)
+2. `application.yml`의 `spring.datasource` 확인 (기본: `localhost:5432`, 사용자 `kuma`)
+3. `./gradlew bootRun` 또는 IDE에서 `MarketApplication` 실행 (프로파일 없음 = Postgres)
+
+**`dev` 프로파일**은 이제 datasource를 바꾸지 않습니다. Postgres 그대로 쓰면서 로그만 조금 더 자세히 보려면:
+
+- `./gradlew bootRun --args='--spring.profiles.active=dev'`
+
+### 2) PostgreSQL 없이 (H2 메모리만)
+
+- `./gradlew bootRun --args='--spring.profiles.active=h2'`
 
 H2 콘솔: http://localhost:8080/h2-console  
 (JDBC URL: `jdbc:h2:mem:market`, 사용자: `sa`, 비밀번호 없음)
-
-### 2) PostgreSQL 사용 (기본 프로파일)
-
-1. PostgreSQL에서 DB `market` 생성
-2. 사용자 `kuma` / 비밀번호 `1234` 생성 및 권한 부여
-3. `application.yml`의 `spring.datasource` 확인
-4. `MarketApplication` 실행 또는  
-   `./gradlew bootRun`
 
 ## API
 

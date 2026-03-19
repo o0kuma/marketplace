@@ -11,6 +11,7 @@ import lombok.NoArgsConstructor;
 
 import java.util.Comparator;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Getter
@@ -35,6 +36,13 @@ public class ProductResponse {
     private List<ProductVariantResponse> variants;
 
     public static ProductResponse from(Product product) {
+        return from(product, null);
+    }
+
+    /**
+     * @param variantOptionValueIdsFallback variant id → ordered option value ids from join table when JPA bag is empty
+     */
+    public static ProductResponse from(Product product, Map<Long, List<Long>> variantOptionValueIdsFallback) {
         List<String> urls = product.getImageUrls();
         String mainUrl = product.getImageUrl();
         if (urls.isEmpty() && mainUrl != null) {
@@ -47,9 +55,11 @@ public class ProductResponse {
                 .sorted(Comparator.comparingInt(OptionGroup::getSortOrder))
                 .map(OptionGroupResponse::from)
                 .toList();
-        List<ProductVariantResponse> vars = product.getVariants().stream()
-                .map(ProductVariantResponse::from)
-                .collect(Collectors.toList());
+        Map<Long, List<Long>> fb = variantOptionValueIdsFallback != null ? variantOptionValueIdsFallback : Map.of();
+        List<ProductVariantResponse> vars =
+                product.getVariants().stream()
+                        .map(v -> ProductVariantResponse.from(v, fb.get(v.getId())))
+                        .collect(Collectors.toList());
         return ProductResponse.builder()
                 .id(product.getId())
                 .name(product.getName())

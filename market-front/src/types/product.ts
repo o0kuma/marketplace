@@ -19,7 +19,8 @@ export interface ProductVariantResponse {
   stockQuantity: number;
   sku?: string | null;
   optionSummary?: string | null;
-  optionValueIds?: number[];
+  /** Backend uses Long; JSON may deserialize as number or string — compare with numeric coercion on the client. */
+  optionValueIds?: (number | string)[];
 }
 
 export interface Product {

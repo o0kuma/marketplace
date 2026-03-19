@@ -56,20 +56,35 @@ export default function EditProductPage() {
             values: (g.values ?? []).sort((a, b) => a.sortOrder - b.sortOrder).map((v) => ({ name: v.name, sortOrder: v.sortOrder })),
           }))
         );
-        setVariants(
-          p.variants.map((v) => {
-            const optionValueNames = groupsSorted.map((grp) => {
-              const val = (grp.values ?? []).find((vv) => v.optionValueIds?.includes(vv.id));
-              return val?.name ?? "";
-            });
-            return {
-              optionValueNames,
+        const rowsFromApi = p.variants.map((v) => {
+          const optionValueNames = groupsSorted.map((grp) => {
+            const val = (grp.values ?? []).find((vv) => v.optionValueIds?.includes(vv.id));
+            return val?.name ?? "";
+          });
+          return {
+            optionValueNames,
+            price: String(v.price),
+            stockQuantity: String(v.stockQuantity),
+            sku: v.sku ?? "",
+          };
+        });
+        /** When API omitted optionValueIds (broken join table), pre-fill single-group SKUs by stable order. */
+        const allNamesEmpty = rowsFromApi.every((row) => row.optionValueNames.every((n) => !String(n).trim()));
+        const oneGroup = groupsSorted.length === 1;
+        const valsSorted = [...(groupsSorted[0]?.values ?? [])].sort((a, b) => a.sortOrder - b.sortOrder);
+        const varsSorted = [...p.variants].sort((a, b) => a.id - b.id);
+        if (allNamesEmpty && oneGroup && valsSorted.length === varsSorted.length && valsSorted.length > 0) {
+          setVariants(
+            varsSorted.map((v, i) => ({
+              optionValueNames: [valsSorted[i].name],
               price: String(v.price),
               stockQuantity: String(v.stockQuantity),
               sku: v.sku ?? "",
-            };
-          })
-        );
+            }))
+          );
+        } else {
+          setVariants(rowsFromApi);
+        }
       } else {
         setOptionGroups([]);
         setVariants([]);
@@ -249,6 +264,7 @@ export default function EditProductPage() {
           }),
         });
       } else {
+        console.log("optionGroups----", optionGroups);
         const optionGroupsPayload: OptionGroupInput[] = optionGroups
           .map((g, i) => ({
             name: g.name.trim(),

@@ -4,12 +4,19 @@ import LoadingSpinner from "@/app/components/LoadingSpinner";
 import WishlistButton from "@/app/components/WishlistButton";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
-import type { Product } from "@/types/product";
+import type { Product, ProductVariantResponse } from "@/types/product";
 import type { Review, ReviewableOrderItem } from "@/types/review";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+
+/** Coerce API ids (number | string) so variant matching works after JSON parse. */
+function toNumericOptionId(value: number | string | null | undefined): number | null {
+  if (value == null) return null;
+  const n = typeof value === "number" ? value : Number(value);
+  return Number.isFinite(n) ? n : null;
+}
 
 export default function ProductDetailPage() {
   const params = useParams();
@@ -186,16 +193,24 @@ export default function ProductDetailPage() {
 
   const hasVariants = !!(product?.variants && product.variants.length > 0);
   const groupsSorted = product?.optionGroups?.slice().sort((a, b) => a.sortOrder - b.sortOrder) ?? [];
-  const selectedVariant =
+  let selectedVariant: ProductVariantResponse | null = null;
+  if (
     hasVariants &&
     product?.variants &&
     selectedOptionValueIds.length === groupsSorted.length &&
     selectedOptionValueIds.every((id) => id != null)
-      ? product.variants.find((v) => {
-          const ids = v.optionValueIds ?? [];
-          return ids.length === selectedOptionValueIds.length && (selectedOptionValueIds as number[]).every((id) => ids.includes(id));
-        })
-      : null;
+  ) {
+    const selectedNumeric = (selectedOptionValueIds as number[]).map((id) => toNumericOptionId(id)).filter((n): n is number => n != null);
+    if (selectedNumeric.length === groupsSorted.length) {
+      const found = product.variants.find((v) => {
+        const ids = (v.optionValueIds ?? []).map((x) => toNumericOptionId(x)).filter((n): n is number => n != null);
+        if (ids.length !== selectedNumeric.length) return false;
+        return selectedNumeric.every((sid) => ids.includes(sid));
+      });
+      selectedVariant = found ?? null;
+    }
+  }
+
   const displayPrice = selectedVariant ? selectedVariant.price : product?.price ?? 0;
   const displayStock = selectedVariant ? selectedVariant.stockQuantity : product?.stockQuantity ?? 0;
 
@@ -311,12 +326,14 @@ export default function ProductDetailPage() {
                         onClick={() =>
                           setSelectedOptionValueIds((prev) => {
                             const next = [...prev];
-                            next[gi] = prev[gi] === val.id ? null : val.id;
+                            const vid = toNumericOptionId(val.id);
+                            const prevId = toNumericOptionId(prev[gi] ?? undefined);
+                            next[gi] = prevId === vid ? null : val.id;
                             return next;
                           })
                         }
                         className={`rounded-full border px-3 py-1.5 text-sm transition ${
-                          selectedOptionValueIds[gi] === val.id
+                          toNumericOptionId(selectedOptionValueIds[gi]) === toNumericOptionId(val.id)
                             ? "border-teal-600 bg-teal-50 text-teal-800"
                             : "border-stone-200 bg-white text-stone-700 hover:border-stone-300"
                         }`}

@@ -8,6 +8,7 @@ import com.project.api.domain.ProductStatus;
 import com.project.api.domain.ProductVariant;
 import com.project.api.repository.CategoryRepository;
 import com.project.api.repository.ProductRepository;
+import com.project.api.repository.ProductVariantRepository;
 import com.project.api.repository.ProductSpecs;
 import com.project.api.web.ForbiddenException;
 import com.project.api.web.NotFoundException;
@@ -25,7 +26,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Product CRUD. List excludes DELETED. Create requires seller (by id for now).
@@ -36,6 +39,7 @@ import java.util.List;
 public class ProductService {
 
     private final ProductRepository productRepository;
+    private final ProductVariantRepository productVariantRepository;
     private final CategoryRepository categoryRepository;
     private final MemberService memberService;
 
@@ -60,7 +64,36 @@ public class ProductService {
         if (product.getStatus() == ProductStatus.DELETED) {
             throw new NotFoundException("Product not found: " + id);
         }
-        return ProductResponse.from(product);
+        // Avoid MultipleBagFetchException: do not join-fetch two List collections in one query.
+        // Touch associations in separate lazy loads while still inside this read-only transaction.
+        initializeProductCollectionsForDetail(product);
+
+        Map<Long, List<Long>> variantOptionFallback = new LinkedHashMap<>();
+        for (ProductVariant v : product.getVariants()) {
+            if (!v.getOptionValues().isEmpty()) {
+                continue;
+            }
+            List<Long> fromJoin = productVariantRepository.findOptionValueIdsByVariantIdOrdered(v.getId());
+            if (fromJoin != null && !fromJoin.isEmpty()) {
+                variantOptionFallback.put(v.getId(), fromJoin);
+            }
+        }
+        return ProductResponse.from(product, variantOptionFallback.isEmpty() ? null : variantOptionFallback);
+    }
+
+    /**
+     * Loads option groups/values and variant option links so {@link com.project.api.web.dto.ProductResponse}
+     * gets non-empty {@code optionValueIds}. Each step uses at most one bag fetch per query.
+     */
+    private void initializeProductCollectionsForDetail(Product product) {
+        for (OptionGroup g : product.getOptionGroups()) {
+            g.getOptionValuesOrdered().size();
+        }
+        for (ProductVariant v : product.getVariants()) {
+            for (OptionValue ov : v.getOptionValues()) {
+                ov.getOptionGroup().getSortOrder();
+            }
+        }
     }
 
     @Transactional
@@ -168,13 +201,28 @@ public class ProductService {
             product.setStatus(request.getStatus());
         }
 
-        // Replace option groups and variants when request defines them
-        if (optionGroups != null || variants != null) {
+        /*
+         * Options / variants:
+         * - Full replace: both non-empty lists → clear + attach (join table repopulated).
+         * - Explicit remove: both empty lists (sent as []) → clear only.
+         * - Omit both (null): leave existing options/variants unchanged (no accidental wipe).
+         * Previously: (optionGroups != null || variants != null) cleared even when lists were empty,
+         * so attach did not run → empty product_variant_option_values and broken storefront.
+         */
+        boolean explicitRemoveAllOptions =
+                optionGroups != null && optionGroups.isEmpty() && variants != null && variants.isEmpty();
+        if (requestHasOptions) {
             product.getOptionGroups().clear();
             product.getVariants().clear();
-            if (requestHasOptions) {
-                attachOptionGroupsAndVariants(product, optionGroups, variants);
-            }
+            attachOptionGroupsAndVariants(product, optionGroups, variants);
+        } else if (explicitRemoveAllOptions) {
+            product.getOptionGroups().clear();
+            product.getVariants().clear();
+            productRepository.save(product);
+            productRepository.flush();
+        } else if ((optionGroups != null && optionGroups.isEmpty()) != (variants != null && variants.isEmpty())) {
+            throw new IllegalArgumentException(
+                    "To remove all options, send both optionGroups and variants as empty arrays; otherwise omit both fields.");
         }
         return ProductResponse.from(product);
     }
@@ -226,6 +274,27 @@ public class ProductService {
             createdVariants.get(i).getOptionValues().addAll(ovals);
         }
         productRepository.save(product);
+        productRepository.flush();
+        syncProductVariantOptionJoinTable(createdVariants);
+    }
+
+    /**
+     * Explicit join-table writes so {@code product_variant_option_values} is never left empty when
+     * option values were attached in memory (Hibernate sometimes omits ManyToMany inserts).
+     */
+    private void syncProductVariantOptionJoinTable(List<ProductVariant> variants) {
+        for (ProductVariant v : variants) {
+            Long variantId = v.getId();
+            if (variantId == null) {
+                continue;
+            }
+            for (OptionValue ov : v.getOptionValues()) {
+                Long oid = ov.getId();
+                if (oid != null) {
+                    productVariantRepository.insertJoinLinkIfMissing(variantId, oid);
+                }
+            }
+        }
     }
 
     private List<OptionValue> resolveOptionValues(List<OptionGroup> groupsOrdered, List<String> names) {

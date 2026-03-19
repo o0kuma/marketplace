@@ -1,3 +1,5 @@
+# Default datasource: PostgreSQL (docker-compose: postgres:5432, db market).
+# Profile `dev` keeps this URL — use profile `h2` only for in-memory DB without Postgres.
 server:
   port: 8080
 

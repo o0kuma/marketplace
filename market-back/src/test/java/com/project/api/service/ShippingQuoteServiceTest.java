@@ -8,7 +8,7 @@ import org.springframework.test.context.ActiveProfiles;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 
 @SpringBootTest
-@ActiveProfiles("dev")
+@ActiveProfiles("h2")
 class ShippingQuoteServiceTest {
 
     @Autowired

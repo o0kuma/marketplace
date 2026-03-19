@@ -1,16 +1,8 @@
-# H2 in-memory DB - PostgreSQL 없이 로컬 실행 시 사용
-# 실행: ./gradlew bootRun --args='--spring.profiles.active=dev'
-spring:
-  datasource:
-    url: jdbc:h2:mem:market;DB_CLOSE_DELAY=-1;MODE=PostgreSQL
-    username: sa
-    password:
-    driver-class-name: org.h2.Driver
-  h2:
-    console:
-      enabled: true
-  jpa:
-    hibernate:
-      ddl-auto: update
-    database-platform: org.hibernate.dialect.H2Dialect
-    defer-datasource-initialization: true
+# Local dev profile — does NOT override datasource.
+# Uses PostgreSQL from application.yml (jdbc:postgresql://localhost:5432/market by default).
+# Start DB: `docker compose up -d` from repo root so DBeaver and the API see the same data.
+#
+# In-memory H2 only (no Postgres): run with --spring.profiles.active=h2
+logging:
+  level:
+    com.project.api: DEBUG

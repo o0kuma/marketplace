@@ -37,13 +37,14 @@ public class ProductVariant extends BaseTimeEntity {
     @Column(length = 64)
     private String sku;
 
-    @ManyToMany
+    /** Not final: Hibernate replaces this list with a lazy persistent bag so join-table rows load and persist. */
+    @ManyToMany(fetch = FetchType.LAZY)
     @JoinTable(
             name = "product_variant_option_values",
             joinColumns = @JoinColumn(name = "variant_id"),
             inverseJoinColumns = @JoinColumn(name = "option_value_id")
     )
-    private final List<OptionValue> optionValues = new ArrayList<>();
+    private List<OptionValue> optionValues = new ArrayList<>();
 
     @Builder
     public ProductVariant(Product product, Integer price, Integer stockQuantity, String sku) {
