@@ -3,6 +3,8 @@
 # Start DB: `docker compose up -d` from repo root so DBeaver and the API see the same data.
 #
 # In-memory H2 only (no Postgres): run with --spring.profiles.active=h2
+#
+# Password reset emails: set SMTP in application-local.yml or env (see market-back/application.example.yml, DEPLOY.md).
 logging:
   level:
     com.project.api: DEBUG

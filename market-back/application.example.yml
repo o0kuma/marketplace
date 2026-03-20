@@ -1,0 +1,23 @@
+# Example overrides — copy to src/main/resources/application-local.yml (gitignored)
+# or set the equivalent environment variables shown in DEPLOY.md.
+#
+# Password reset emails require a non-empty spring.mail.host.
+
+spring:
+  mail:
+    host: smtp.example.com
+    port: 587
+    username: your-smtp-username
+    password: your-smtp-password
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
+
+app:
+  mail:
+    from: noreply@yourdomain.com
+  # Base URL for links in emails (password reset, order notices)
+  front-url: http://localhost:3000

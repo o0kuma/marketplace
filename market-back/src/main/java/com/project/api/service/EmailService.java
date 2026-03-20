@@ -36,6 +36,10 @@ public class EmailService {
     }
 
     public void sendPasswordResetEmail(String toEmail, String memberName, String resetToken) {
+        if (!isConfigured()) {
+            log.warn(
+                    "Password reset was requested but mail is not configured (set MAIL_HOST / spring.mail.host). No email sent.");
+        }
         String resetLink = frontUrl + "/reset-password?token=" + resetToken;
         String subject = "비밀번호 재설정 링크";
         String body = String.format("""

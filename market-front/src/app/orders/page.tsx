@@ -29,31 +29,12 @@ function CancelOrderButton({ orderId, onCancelled }: { orderId: number; onCancel
   );
 }
 
-function PayOrderButton({ orderId, totalAmount, onPaid }: { orderId: number; totalAmount: number; onPaid: () => void }) {
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
-  async function pay() {
-    setLoading(true);
-    setError("");
-    try {
-      await api(`/orders/${orderId}/pay`, {
-        method: "POST",
-        body: JSON.stringify({ amount: totalAmount }),
-      });
-      onPaid();
-    } catch (err) {
-      setError(err instanceof Error ? err.message : "결제 실패");
-    } finally {
-      setLoading(false);
-    }
-  }
+/** Stub POST /pay is disabled when Toss is configured; payment runs on order detail (Toss widget + confirm). */
+function PayOnDetailLink({ orderId }: { orderId: number }) {
   return (
-    <div>
-      <button type="button" onClick={pay} disabled={loading} className="btn-primary">
-        {loading ? "결제 중..." : "결제하기"}
-      </button>
-      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
-    </div>
+    <Link href={`/orders/${orderId}`} className="btn-primary inline-flex items-center justify-center">
+      결제하기
+    </Link>
   );
 }
 
@@ -156,7 +137,7 @@ export default function OrdersPage() {
               </ul>
               {order.status === "ORDERED" && (
                 <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-zinc-100 pt-4">
-                  <PayOrderButton orderId={order.id} totalAmount={order.totalAmount} onPaid={fetchOrders} />
+                  <PayOnDetailLink orderId={order.id} />
                   <CancelOrderButton orderId={order.id} onCancelled={fetchOrders} />
                 </div>
               )}
