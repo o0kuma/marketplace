@@ -5,6 +5,11 @@
 # In-memory H2 only (no Postgres): run with --spring.profiles.active=h2
 #
 # Password reset emails: set SMTP in application-local.yml or env (see market-back/application.example.yml, DEPLOY.md).
+app:
+  payment:
+    toss:
+      # Local/dev convenience for repeated test payments with same orderId.
+      allow-duplicate-order-id-bypass: true
 logging:
   level:
     com.project.api: DEBUG

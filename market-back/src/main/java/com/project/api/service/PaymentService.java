@@ -34,6 +34,8 @@ public class PaymentService {
 
     @Value("${app.payment.webhook-secret:}")
     private String webhookSecret;
+    @Value("${app.payment.toss.allow-duplicate-order-id-bypass:false}")
+    private boolean allowDuplicateOrderIdBypass;
 
     public PaymentService(OrderRepository orderRepository,
                           PaymentRepository paymentRepository,
@@ -81,11 +83,21 @@ public class PaymentService {
         if (!tossPaymentService.isConfigured()) {
             throw new IllegalStateException("Toss Payments is not configured");
         }
-        String pgTransactionId = tossPaymentService.confirm(
-                request.getPaymentKey(),
-                request.getOrderId(),
-                request.getAmount()
-        );
+        String pgTransactionId;
+        try {
+            pgTransactionId = tossPaymentService.confirm(
+                    request.getPaymentKey(),
+                    request.getOrderId(),
+                    request.getAmount()
+            );
+        } catch (IllegalArgumentException e) {
+            boolean duplicatedOrderId = e.getMessage() != null && e.getMessage().contains("DUPLICATED_ORDER_ID");
+            if (!allowDuplicateOrderIdBypass || !duplicatedOrderId) {
+                throw e;
+            }
+            // Dev-only safety valve for repeated local tests: only DUPLICATED_ORDER_ID is bypassed.
+            pgTransactionId = request.getPaymentKey();
+        }
         Payment payment = Payment.builder()
                 .order(order)
                 .amount(request.getAmount())

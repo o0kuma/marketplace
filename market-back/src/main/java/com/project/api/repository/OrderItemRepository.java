@@ -15,4 +15,6 @@ public interface OrderItemRepository extends JpaRepository<OrderItem, Long> {
             @Param("buyerId") Long buyerId,
             @Param("status") OrderStatus status,
             @Param("productId") Long productId);
+
+    boolean existsByProductVariantId(Long productVariantId);
 }

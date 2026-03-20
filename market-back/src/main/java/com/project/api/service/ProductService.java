@@ -7,6 +7,7 @@ import com.project.api.domain.Product;
 import com.project.api.domain.ProductStatus;
 import com.project.api.domain.ProductVariant;
 import com.project.api.repository.CategoryRepository;
+import com.project.api.repository.OrderItemRepository;
 import com.project.api.repository.ProductRepository;
 import com.project.api.repository.ProductVariantRepository;
 import com.project.api.repository.ProductSpecs;
@@ -29,6 +30,9 @@ import java.util.Comparator;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.HashSet;
 
 /**
  * Product CRUD. List excludes DELETED. Create requires seller (by id for now).
@@ -41,6 +45,7 @@ public class ProductService {
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
     private final CategoryRepository categoryRepository;
+    private final OrderItemRepository orderItemRepository;
     private final MemberService memberService;
 
     public Page<ProductResponse> getList(Pageable pageable, String keyword, ProductStatus statusFilter, Long categoryId, Integer minPrice, Integer maxPrice) {
@@ -200,6 +205,7 @@ public class ProductService {
         if (request.getStatus() != null && request.getStatus() != ProductStatus.DELETED) {
             product.setStatus(request.getStatus());
         }
+        boolean hasReferencedVariants = hasReferencedVariants(product);
 
         /*
          * Options / variants:
@@ -212,10 +218,17 @@ public class ProductService {
         boolean explicitRemoveAllOptions =
                 optionGroups != null && optionGroups.isEmpty() && variants != null && variants.isEmpty();
         if (requestHasOptions) {
-            product.getOptionGroups().clear();
-            product.getVariants().clear();
-            attachOptionGroupsAndVariants(product, optionGroups, variants);
+            if (hasReferencedVariants) {
+                updateVariantsWithoutRecreate(product, variants);
+            } else {
+                product.getOptionGroups().clear();
+                product.getVariants().clear();
+                attachOptionGroupsAndVariants(product, optionGroups, variants);
+            }
         } else if (explicitRemoveAllOptions) {
+            if (hasReferencedVariants) {
+                throw new IllegalArgumentException("Cannot remove options/variants because existing variants are referenced by order history");
+            }
             product.getOptionGroups().clear();
             product.getVariants().clear();
             productRepository.save(product);
@@ -225,6 +238,53 @@ public class ProductService {
                     "To remove all options, send both optionGroups and variants as empty arrays; otherwise omit both fields.");
         }
         return ProductResponse.from(product);
+    }
+
+    private boolean hasReferencedVariants(Product product) {
+        for (ProductVariant v : product.getVariants()) {
+            if (v.getId() != null && orderItemRepository.existsByProductVariantId(v.getId())) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private void updateVariantsWithoutRecreate(Product product, List<ProductVariantInput> variants) {
+        List<OptionGroup> groupsOrdered = product.getOptionGroups().stream()
+                .sorted(Comparator.comparingInt(OptionGroup::getSortOrder))
+                .toList();
+        Map<String, ProductVariant> existingByKey = new LinkedHashMap<>();
+        for (ProductVariant existing : product.getVariants()) {
+            List<String> names = existing.getOptionValues().stream()
+                    .sorted(Comparator.comparingInt(ov -> ov.getOptionGroup().getSortOrder()))
+                    .map(OptionValue::getName)
+                    .toList();
+            existingByKey.put(toVariantKey(names), existing);
+        }
+        if (existingByKey.size() != variants.size()) {
+            throw new IllegalArgumentException("Cannot add/remove option combinations after order history exists");
+        }
+        Set<Long> matchedIds = new HashSet<>();
+        for (ProductVariantInput vi : variants) {
+            List<OptionValue> resolved = resolveOptionValues(groupsOrdered, vi.getOptionValueNames());
+            List<String> names = resolved.stream().map(OptionValue::getName).toList();
+            ProductVariant existing = existingByKey.get(toVariantKey(names));
+            if (existing == null) {
+                throw new IllegalArgumentException("Cannot change option combinations after order history exists");
+            }
+            matchedIds.add(existing.getId());
+            existing.setPrice(vi.getPrice());
+            existing.setStockQuantity(vi.getStockQuantity());
+            existing.setSku(vi.getSku());
+        }
+        long existingIdCount = product.getVariants().stream().map(ProductVariant::getId).filter(Objects::nonNull).count();
+        if (matchedIds.size() != existingIdCount) {
+            throw new IllegalArgumentException("Cannot remove option combinations after order history exists");
+        }
+    }
+
+    private String toVariantKey(List<String> optionValueNames) {
+        return String.join("||", optionValueNames);
     }
 
     /**

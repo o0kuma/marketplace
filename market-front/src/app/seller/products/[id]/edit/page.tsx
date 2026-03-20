@@ -264,7 +264,6 @@ export default function EditProductPage() {
           }),
         });
       } else {
-        console.log("optionGroups----", optionGroups);
         const optionGroupsPayload: OptionGroupInput[] = optionGroups
           .map((g, i) => ({
             name: g.name.trim(),

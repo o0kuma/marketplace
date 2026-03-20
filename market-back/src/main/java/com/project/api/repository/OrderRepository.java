@@ -48,6 +48,33 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     @Query("select coalesce(sum(i.quantity * i.orderPrice), 0L) from Order o join o.items i where i.product.seller.id = :sellerId and o.createdAt >= :from and o.createdAt < :to")
     long sumSalesBySellerIdAndOrderCreatedAtBetween(@Param("sellerId") Long sellerId, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to);
 
+    @Query("select count(distinct o) from Order o join o.items i where i.product.seller.id = :sellerId and o.status = :status")
+    long countBySellerIdAndStatus(@Param("sellerId") Long sellerId, @Param("status") OrderStatus status);
+
+    @Query("""
+            select count(distinct o) from Order o
+            join o.items i
+            where i.product.seller.id = :sellerId
+              and o.status = :status
+              and o.createdAt >= :from and o.createdAt < :to
+            """)
+    long countBySellerIdAndStatusAndCreatedAtBetween(
+            @Param("sellerId") Long sellerId,
+            @Param("status") OrderStatus status,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to);
+
+    @Query("""
+            select count(distinct o) from Order o
+            join o.items i
+            where i.product.seller.id = :sellerId
+              and o.status in :statuses
+              and (o.trackingNumber is null or trim(o.trackingNumber) = '')
+            """)
+    long countBySellerIdAndStatusInAndTrackingEmpty(
+            @Param("sellerId") Long sellerId,
+            @Param("statuses") List<OrderStatus> statuses);
+
     @Query("select distinct o from Order o join o.items i where i.product.seller.id = :sellerId and o.createdAt >= :from and o.createdAt < :to order by o.createdAt desc")
     Page<Order> findBySellerIdAndCreatedAtBetween(@Param("sellerId") Long sellerId, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
 

@@ -18,8 +18,13 @@ public class SellerStatsResponse {
     private long orderCount;
     /** Orders not yet complete (ORDERED, PAYMENT_COMPLETE, SHIPPING). */
     private long pendingOrderCount;
+    private long cancelledOrderCount;
+    private long pendingShipmentCount;
+    private long returnRequestedCount;
     private long todayOrderCount;
     private long weekOrderCount;
+    private long monthOrderCount;
     private long todaySales;
     private long weekSales;
+    private long monthSales;
 }

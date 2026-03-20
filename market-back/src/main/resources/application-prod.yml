@@ -14,6 +14,9 @@ app:
     secret: ${JWT_SECRET}
     expiration-ms: ${JWT_EXPIRATION_MS:86400000}
   upload-dir: ${APP_UPLOAD_DIR:/app/uploads}
+  payment:
+    toss:
+      allow-duplicate-order-id-bypass: false
 
 logging:
   level:
