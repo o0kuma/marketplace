@@ -23,6 +23,7 @@ export interface Order {
   recipientPhone?: string;
   recipientAddress?: string;
   trackingNumber?: string | null;
+  refunded?: boolean;
   items: OrderItemResponse[];
 }
 

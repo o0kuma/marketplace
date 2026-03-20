@@ -25,9 +25,14 @@ public class OrderResponse {
     private String recipientPhone;
     private String recipientAddress;
     private String trackingNumber;
+    private Boolean refunded;
     private List<OrderItemResponse> items;
 
     public static OrderResponse from(Order order) {
+        return from(order, false);
+    }
+
+    public static OrderResponse from(Order order, boolean refunded) {
         List<OrderItemResponse> itemResponses = order.getItems().stream()
                 .map(OrderItemResponse::from)
                 .toList();
@@ -44,6 +49,7 @@ public class OrderResponse {
                 .recipientPhone(order.getRecipientPhone())
                 .recipientAddress(order.getRecipientAddress())
                 .trackingNumber(order.getTrackingNumber())
+                .refunded(refunded)
                 .items(itemResponses)
                 .build();
     }

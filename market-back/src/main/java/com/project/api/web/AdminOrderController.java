@@ -1,6 +1,7 @@
 package com.project.api.web;
 
 import com.project.api.domain.OrderStatus;
+import com.project.api.service.AdminActionLogService;
 import com.project.api.service.OrderService;
 import com.project.api.service.PaymentService;
 import com.project.api.web.dto.OrderResponse;
@@ -10,6 +11,8 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.User;
 import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
@@ -23,6 +26,7 @@ public class AdminOrderController {
 
     private final OrderService orderService;
     private final PaymentService paymentService;
+    private final AdminActionLogService adminActionLogService;
 
     @GetMapping
     public PageResponse<OrderResponse> list(
@@ -44,7 +48,13 @@ public class AdminOrderController {
 
     @PostMapping("/{id}/refund")
     @ResponseStatus(HttpStatus.NO_CONTENT)
-    public void refund(@PathVariable Long id) {
+    public void refund(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id,
+            @RequestParam(required = false) String reason
+    ) {
         paymentService.refundByAdmin(id);
+        Long adminId = Long.parseLong(user.getUsername());
+        adminActionLogService.log(adminId, "ORDER_REFUND", "ORDER", id, reason, "admin refund");
     }
 }

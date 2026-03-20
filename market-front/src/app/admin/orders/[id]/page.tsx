@@ -3,6 +3,8 @@
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
+import type { AdminActionLog } from "@/types/admin";
+import type { PageResponse } from "@/types/common";
 import type { Order } from "@/types/order";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
@@ -25,14 +27,21 @@ export default function AdminOrderDetailPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [refunding, setRefunding] = useState(false);
+  const [logs, setLogs] = useState<AdminActionLog[]>([]);
 
   const fetchOrder = useCallback(async () => {
     if (Number.isNaN(id) || !user) return;
     setLoading(true);
     setError("");
     try {
-      const o = await api<Order>(`/admin/orders/${id}`);
+      const [o, l] = await Promise.all([
+        api<Order>(`/admin/orders/${id}`),
+        api<PageResponse<AdminActionLog>>("/admin/action-logs", {
+          params: { targetType: "ORDER", targetId: String(id), page: "0", size: "10" },
+        }),
+      ]);
       setOrder(o);
+      setLogs(l.content ?? []);
     } catch (err) {
       setError(err instanceof Error ? err.message : "주문을 불러올 수 없습니다.");
       setOrder(null);
@@ -51,10 +60,12 @@ export default function AdminOrderDetailPage() {
 
   async function handleRefund() {
     if (!order || !confirm("이 주문을 환불 처리하시겠습니까?")) return;
+    const reason = prompt("환불 처리 사유를 입력하세요 (감사 로그 기록)");
+    if (reason === null) return;
     setRefunding(true);
     setError("");
     try {
-      await api(`/admin/orders/${order.id}/refund`, { method: "POST" });
+      await api(`/admin/orders/${order.id}/refund?reason=${encodeURIComponent(reason)}`, { method: "POST" });
       fetchOrder();
     } catch (err) {
       setError(err instanceof Error ? err.message : "환불 처리 실패");
@@ -109,6 +120,23 @@ export default function AdminOrderDetailPage() {
           )}
           <Link href="/admin/orders" className="btn-secondary">목록</Link>
         </div>
+      </div>
+      <div className="card mt-6">
+        <h2 className="text-sm font-semibold text-zinc-700">관리자 액션 로그</h2>
+        {logs.length === 0 ? (
+          <p className="mt-2 text-sm text-zinc-500">기록이 없습니다.</p>
+        ) : (
+          <ul className="mt-2 space-y-2">
+            {logs.map((log) => (
+              <li key={log.id} className="rounded-lg border border-zinc-200 bg-zinc-50/50 px-3 py-2 text-sm">
+                <p className="font-medium text-zinc-800">{log.actionType}</p>
+                <p className="text-zinc-600">{new Date(log.createdAt).toLocaleString()} · admin #{log.adminId}</p>
+                {log.reason && <p className="text-zinc-700">사유: {log.reason}</p>}
+                {log.details && <p className="text-zinc-500">{log.details}</p>}
+              </li>
+            ))}
+          </ul>
+        )}
       </div>
     </div>
   );

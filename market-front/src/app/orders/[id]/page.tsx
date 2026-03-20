@@ -204,6 +204,18 @@ export default function OrderDetailPage() {
     }
   }
 
+  async function handleSellerRefund() {
+    if (!order || (order.status !== "PAYMENT_COMPLETE" && order.status !== "SHIPPING")) return;
+    if (!confirm("이 주문을 환불 처리하시겠습니까? 결제가 취소되고 주문 상태가 취소로 변경됩니다.")) return;
+    setError("");
+    try {
+      await api(`/orders/${order.id}/refund/seller`, { method: "POST" });
+      fetchOrder();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "환불 처리 실패");
+    }
+  }
+
   const canRequestReturn = order && !["ORDERED", "CANCELLED"].includes(order.status);
   function openReturnModal(type: "RETURN" | "EXCHANGE") {
     setReturnModalType(type);
@@ -467,6 +479,15 @@ export default function OrderDetailPage() {
             <>
               {order.status !== "CANCELLED" && order.status !== "COMPLETE" && (
                 <SellerStatusSelect order={order} onUpdated={fetchOrder} />
+              )}
+              {(order.status === "PAYMENT_COMPLETE" || order.status === "SHIPPING") && (
+                <button
+                  type="button"
+                  onClick={handleSellerRefund}
+                  className="btn-secondary border-red-200 text-red-700 hover:bg-red-50"
+                >
+                  환불 처리
+                </button>
               )}
               <Link href="/seller/orders" className="btn-secondary">
                 판매 주문 목록

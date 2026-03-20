@@ -169,6 +169,27 @@ public class PaymentService {
         notificationService.notifyOrderStatusChange(order, OrderStatus.CANCELLED);
     }
 
+    /** Seller: process refund for an order that includes seller's product(s). */
+    @Transactional
+    public void refundBySeller(Long orderId, Long sellerId) {
+        Order order = orderRepository.findById(orderId)
+                .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
+        if (!order.hasItemFromSeller(sellerId)) {
+            throw new ForbiddenException("Not a seller of this order");
+        }
+        if (order.getStatus() != OrderStatus.PAYMENT_COMPLETE && order.getStatus() != OrderStatus.SHIPPING) {
+            throw new IllegalArgumentException("Refund allowed only for paid or shipping orders");
+        }
+        Payment payment = paymentRepository.findByOrderIdAndStatus(orderId, PaymentStatus.COMPLETED)
+                .orElseThrow(() -> new NotFoundException("No completed payment for this order"));
+        if (tossPaymentService.isConfigured() && isTossPaymentKey(payment.getPgTransactionId())) {
+            tossPaymentService.cancel(payment.getPgTransactionId(), "판매자 환불 처리");
+        }
+        payment.markRefunded();
+        order.setStatus(OrderStatus.CANCELLED);
+        notificationService.notifyOrderStatusChange(order, OrderStatus.CANCELLED);
+    }
+
     /**
      * External PG webhook: marks order paid when shared secret matches.
      * Set app.payment.webhook-secret in production; disabled if blank.

@@ -50,6 +50,47 @@ function OrderStatusSelect({ order, onUpdated }: { order: Order; onUpdated: () =
   );
 }
 
+function SellerRefundButton({ order, onUpdated }: { order: Order; onUpdated: () => void }) {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [success, setSuccess] = useState("");
+
+  if (order.status !== "PAYMENT_COMPLETE" && order.status !== "SHIPPING") {
+    return null;
+  }
+
+  async function refund() {
+    if (!confirm("이 주문을 환불 처리하시겠습니까? 결제가 취소되고 주문 상태가 취소로 변경됩니다.")) return;
+    setLoading(true);
+    setError("");
+    setSuccess("");
+    try {
+      await api(`/orders/${order.id}/refund/seller`, { method: "POST" });
+      setSuccess("환불 처리가 완료되었습니다.");
+      onUpdated();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "환불 처리 실패");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="mt-3">
+      <button
+        type="button"
+        onClick={refund}
+        disabled={loading}
+        className="btn-secondary border-red-200 text-red-700 hover:bg-red-50 disabled:opacity-50"
+      >
+        {loading ? "처리 중..." : "환불 처리"}
+      </button>
+      {error && <p className="mt-1 text-sm text-red-600">{error}</p>}
+      {success && <p className="mt-1 text-sm text-green-700">{success}</p>}
+    </div>
+  );
+}
+
 export default function SellerOrdersPage() {
   const { user } = useAuth();
   const router = useRouter();
@@ -168,6 +209,11 @@ export default function SellerOrdersPage() {
                   <OrderStatusSelect order={order} onUpdated={fetchOrders} />
                 </div>
                 <p className="mt-1 text-zinc-600">총 {order.totalAmount.toLocaleString()}원</p>
+                {order.status === "CANCELLED" && (
+                  <p className="mt-1 inline-flex items-center rounded-full bg-red-50 px-2.5 py-1 text-xs font-medium text-red-700">
+                    {order.refunded ? "환불 완료" : "주문 취소 완료"}
+                  </p>
+                )}
                 {order.recipientName && (
                   <p className="text-sm text-zinc-500">
                     {order.recipientName} / {order.recipientPhone} / {order.recipientAddress}
@@ -187,6 +233,7 @@ export default function SellerOrdersPage() {
                     </li>
                   ))}
                 </ul>
+                <SellerRefundButton order={order} onUpdated={fetchOrders} />
                 <Link href={`/orders/${order.id}`} className="mt-3 inline-block text-sm text-amber-700 hover:underline">
                   주문 상세 / 운송장 입력 →
                 </Link>

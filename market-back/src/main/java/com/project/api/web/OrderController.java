@@ -100,4 +100,13 @@ public class OrderController {
         Long memberId = Long.parseLong(user.getUsername());
         paymentService.refund(id, memberId);
     }
+
+    @PostMapping("/{id}/refund/seller")
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void refundBySeller(
+            @AuthenticationPrincipal User user,
+            @PathVariable Long id) {
+        Long sellerId = Long.parseLong(user.getUsername());
+        paymentService.refundBySeller(id, sellerId);
+    }
 }

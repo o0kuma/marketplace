@@ -9,4 +9,6 @@ import java.util.Optional;
 public interface PaymentRepository extends JpaRepository<Payment, Long> {
 
     Optional<Payment> findByOrderIdAndStatus(Long orderId, PaymentStatus status);
+
+    boolean existsByOrderIdAndStatus(Long orderId, PaymentStatus status);
 }

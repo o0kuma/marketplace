@@ -86,6 +86,13 @@ public class ProductService {
         return ProductResponse.from(product, variantOptionFallback.isEmpty() ? null : variantOptionFallback);
     }
 
+    /** Admin: get product by id including deleted. */
+    public ProductResponse getByIdForAdmin(Long id) {
+        Product product = productRepository.findById(id)
+                .orElseThrow(() -> new NotFoundException("Product not found: " + id));
+        return ProductResponse.from(product);
+    }
+
     /**
      * Loads option groups/values and variant option links so {@link com.project.api.web.dto.ProductResponse}
      * gets non-empty {@code optionValueIds}. Each step uses at most one bag fetch per query.
@@ -414,6 +421,17 @@ public class ProductService {
             if (product.getStatus() != ProductStatus.DELETED) {
                 product.setStatus(status);
             }
+        }
+    }
+
+    /** Admin: bulk status change regardless of owner (including DELETED). */
+    @Transactional
+    public void updateStatusBulkByAdmin(java.util.List<Long> productIds, ProductStatus status) {
+        ProductStatus next = status != null ? status : ProductStatus.ON_SALE;
+        for (Long productId : productIds) {
+            Product product = productRepository.findById(productId)
+                    .orElseThrow(() -> new NotFoundException("Product not found: " + productId));
+            product.setStatus(next);
         }
     }
 }

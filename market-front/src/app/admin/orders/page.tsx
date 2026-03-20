@@ -19,6 +19,7 @@ const STATUS_OPTIONS: { value: OrderStatus | ""; label: string }[] = [
 ];
 
 export default function AdminOrdersPage() {
+  const FILTER_KEY = "admin-orders-filters-v1";
   const { user } = useAuth();
   const router = useRouter();
   const [data, setData] = useState<PageResponse<Order> | null>(null);
@@ -52,13 +53,41 @@ export default function AdminOrdersPage() {
       router.push("/");
       return;
     }
+    try {
+      const raw = localStorage.getItem(FILTER_KEY);
+      if (raw) {
+        const p = JSON.parse(raw) as { status?: OrderStatus | ""; from?: string; to?: string };
+        if (typeof p.status === "string") setStatusFilter(p.status as OrderStatus | "");
+        if (typeof p.from === "string") setDateFrom(p.from);
+        if (typeof p.to === "string") setDateTo(p.to);
+      }
+    } catch {}
     fetchList();
-  }, [user, router, fetchList]);
+  }, [user, router, fetchList, FILTER_KEY]);
+
+  useEffect(() => {
+    localStorage.setItem(FILTER_KEY, JSON.stringify({ status: statusFilter, from: dateFrom, to: dateTo }));
+  }, [FILTER_KEY, statusFilter, dateFrom, dateTo]);
 
   if (!user || user.role !== "ADMIN") return null;
   if (loading && !data) return <LoadingSpinner />;
 
   const orders = data?.content ?? [];
+
+  function downloadCsv() {
+    const rows = [["id", "status", "totalAmount", "recipientName", "recipientAddress"]].concat(
+      orders.map((o) => [String(o.id), o.status, String(o.totalAmount), o.recipientName ?? "", o.recipientAddress ?? ""])
+    );
+    const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const csv = rows.map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `admin-orders-page-${(data?.page ?? 0) + 1}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }
 
   return (
     <div>
@@ -69,6 +98,7 @@ export default function AdminOrdersPage() {
         </select>
         <input type="date" value={dateFrom} onChange={(e) => { setDateFrom(e.target.value); setPage(0); }} className="input-field w-auto" />
         <input type="date" value={dateTo} onChange={(e) => { setDateTo(e.target.value); setPage(0); }} className="input-field w-auto" />
+        <button type="button" onClick={downloadCsv} className="btn-secondary">CSV 내보내기</button>
       </div>
       {error && (
         <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>
@@ -77,21 +107,34 @@ export default function AdminOrdersPage() {
         <div className="empty-state"><p className="text-base">주문이 없습니다.</p></div>
       ) : (
         <>
-          <ul className="space-y-4">
-            {orders.map((order) => (
-              <li key={order.id} className="card">
-                <div className="flex flex-wrap items-center justify-between gap-2">
-                  <Link href={`/admin/orders/${order.id}`} className="font-medium text-zinc-900 hover:underline">
-                    주문 #{order.id}
-                  </Link>
-                  <span className="text-sm text-zinc-500">{order.status}</span>
-                </div>
-                <p className="mt-1 text-zinc-600">총 {order.totalAmount.toLocaleString()}원</p>
-                {order.recipientName && <p className="text-sm text-zinc-500">{order.recipientName} · {order.recipientAddress}</p>}
-                <Link href={`/admin/orders/${order.id}`} className="mt-2 inline-block text-sm text-slate-600 hover:underline">상세 보기 →</Link>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-auto rounded-xl border border-zinc-200 bg-white">
+            <table className="min-w-full text-sm">
+              <thead className="bg-zinc-50 text-zinc-600">
+                <tr>
+                  <th className="px-3 py-2 text-left">주문번호</th>
+                  <th className="px-3 py-2 text-left">상태</th>
+                  <th className="px-3 py-2 text-right">총액</th>
+                  <th className="px-3 py-2 text-left">수령인</th>
+                  <th className="px-3 py-2 text-left">배송지</th>
+                  <th className="px-3 py-2 text-left">상세</th>
+                </tr>
+              </thead>
+              <tbody>
+                {orders.map((order) => (
+                  <tr key={order.id} className="border-t border-zinc-100">
+                    <td className="px-3 py-2 font-medium text-zinc-900">#{order.id}</td>
+                    <td className="px-3 py-2 text-zinc-700">{order.status}</td>
+                    <td className="px-3 py-2 text-right text-zinc-700">{order.totalAmount.toLocaleString()}원</td>
+                    <td className="px-3 py-2 text-zinc-700">{order.recipientName ?? "-"}</td>
+                    <td className="px-3 py-2 text-zinc-700">{order.recipientAddress ?? "-"}</td>
+                    <td className="px-3 py-2">
+                      <Link href={`/admin/orders/${order.id}`} className="text-slate-700 hover:underline">상세 보기</Link>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div className="mt-4 flex items-center justify-center gap-2">
             <button type="button" disabled={data?.first} onClick={() => setPage((p) => p - 1)} className="btn-secondary disabled:opacity-50">이전</button>
             <span className="text-sm text-zinc-600">{(data?.page ?? 0) + 1} / {data?.totalPages ?? 1}</span>

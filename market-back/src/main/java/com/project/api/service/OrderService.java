@@ -2,6 +2,7 @@ package com.project.api.service;
 
 import com.project.api.domain.*;
 import com.project.api.repository.OrderRepository;
+import com.project.api.repository.PaymentRepository;
 import com.project.api.repository.ProductRepository;
 import com.project.api.repository.ProductVariantRepository;
 import com.project.api.web.ForbiddenException;
@@ -23,6 +24,7 @@ public class OrderService {
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
+    private final PaymentRepository paymentRepository;
     private final MemberService memberService;
     private final NotificationService notificationService;
     private final ShippingQuoteService shippingQuoteService;
@@ -95,12 +97,12 @@ public class OrderService {
                 saved.getBuyer().getEmail(),
                 saved.getBuyer().getName(),
                 saved);
-        return OrderResponse.from(saved);
+        return toOrderResponse(saved);
     }
 
     public Page<OrderResponse> getMyOrders(Long buyerId, Pageable pageable) {
         return orderRepository.findByBuyerIdOrderByCreatedAtDesc(buyerId, pageable)
-                .map(OrderResponse::from);
+                .map(this::toOrderResponse);
     }
 
     public OrderResponse getById(Long orderId, Long memberId) {
@@ -111,28 +113,28 @@ public class OrderService {
         if (!isBuyer && !isSeller) {
             throw new ForbiddenException("Not the order buyer or seller");
         }
-        return OrderResponse.from(order);
+        return toOrderResponse(order);
     }
 
     /** Admin: get any order by id. */
     public OrderResponse getByIdForAdmin(Long orderId) {
         Order order = orderRepository.findById(orderId)
                 .orElseThrow(() -> new NotFoundException("Order not found: " + orderId));
-        return OrderResponse.from(order);
+        return toOrderResponse(order);
     }
 
     /** Admin: list all orders with optional status and date range. */
     public Page<OrderResponse> getOrdersForAdmin(OrderStatus status, java.time.LocalDateTime from, java.time.LocalDateTime to, Pageable pageable) {
         if (from != null && to != null) {
             if (status != null) {
-                return orderRepository.findByStatusAndCreatedAtBetweenOrderByCreatedAtDesc(status, from, to, pageable).map(OrderResponse::from);
+                return orderRepository.findByStatusAndCreatedAtBetweenOrderByCreatedAtDesc(status, from, to, pageable).map(this::toOrderResponse);
             }
-            return orderRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(from, to, pageable).map(OrderResponse::from);
+            return orderRepository.findByCreatedAtBetweenOrderByCreatedAtDesc(from, to, pageable).map(this::toOrderResponse);
         }
         if (status != null) {
-            return orderRepository.findByStatusOrderByCreatedAtDesc(status, pageable).map(OrderResponse::from);
+            return orderRepository.findByStatusOrderByCreatedAtDesc(status, pageable).map(this::toOrderResponse);
         }
-        return orderRepository.findAllByOrderByCreatedAtDesc(pageable).map(OrderResponse::from);
+        return orderRepository.findAllByOrderByCreatedAtDesc(pageable).map(this::toOrderResponse);
     }
 
     @Transactional
@@ -172,23 +174,23 @@ public class OrderService {
                     order.getBuyer().getName(),
                     order);
         }
-        return OrderResponse.from(order);
+        return toOrderResponse(order);
     }
 
     public Page<OrderResponse> getSellerOrders(Long sellerId, Pageable pageable) {
-        return orderRepository.findBySellerId(sellerId, pageable).map(OrderResponse::from);
+        return orderRepository.findBySellerId(sellerId, pageable).map(this::toOrderResponse);
     }
 
     public Page<OrderResponse> getSellerOrders(Long sellerId, OrderStatus status, Pageable pageable) {
-        return orderRepository.findBySellerIdAndStatus(sellerId, status, pageable).map(OrderResponse::from);
+        return orderRepository.findBySellerIdAndStatus(sellerId, status, pageable).map(this::toOrderResponse);
     }
 
     public Page<OrderResponse> getSellerOrders(Long sellerId, java.time.LocalDateTime from, java.time.LocalDateTime to, Pageable pageable) {
-        return orderRepository.findBySellerIdAndCreatedAtBetween(sellerId, from, to, pageable).map(OrderResponse::from);
+        return orderRepository.findBySellerIdAndCreatedAtBetween(sellerId, from, to, pageable).map(this::toOrderResponse);
     }
 
     public Page<OrderResponse> getSellerOrders(Long sellerId, OrderStatus status, java.time.LocalDateTime from, java.time.LocalDateTime to, Pageable pageable) {
-        return orderRepository.findBySellerIdAndStatusAndCreatedAtBetween(sellerId, status, from, to, pageable).map(OrderResponse::from);
+        return orderRepository.findBySellerIdAndStatusAndCreatedAtBetween(sellerId, status, from, to, pageable).map(this::toOrderResponse);
     }
 
     @Transactional
@@ -199,6 +201,11 @@ public class OrderService {
             throw new ForbiddenException("Not a seller of this order");
         }
         order.setTrackingNumber(trackingNumber != null ? trackingNumber.trim() : null);
-        return OrderResponse.from(order);
+        return toOrderResponse(order);
+    }
+
+    private OrderResponse toOrderResponse(Order order) {
+        boolean refunded = paymentRepository.existsByOrderIdAndStatus(order.getId(), PaymentStatus.REFUNDED);
+        return OrderResponse.from(order, refunded);
     }
 }

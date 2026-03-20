@@ -5,7 +5,6 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import type { PageResponse } from "@/types/common";
 import type { Product, ProductStatus } from "@/types/product";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -18,6 +17,7 @@ const STATUS_OPTIONS: { value: ProductStatus | ""; label: string }[] = [
 ];
 
 export default function AdminProductsPage() {
+  const FILTER_KEY = "admin-products-filters-v1";
   const { user } = useAuth();
   const router = useRouter();
   const [data, setData] = useState<PageResponse<Product> | null>(null);
@@ -29,6 +29,7 @@ export default function AdminProductsPage() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [updatingId, setUpdatingId] = useState<number | null>(null);
+  const [selected, setSelected] = useState<number[]>([]);
 
   const fetchList = useCallback(async () => {
     if (!user) return;
@@ -53,24 +54,71 @@ export default function AdminProductsPage() {
       router.push("/");
       return;
     }
+    try {
+      const raw = localStorage.getItem(FILTER_KEY);
+      if (raw) {
+        const p = JSON.parse(raw) as { keyword?: string; status?: ProductStatus | ""; categoryId?: string };
+        if (typeof p.keyword === "string") setKeyword(p.keyword);
+        if (typeof p.status === "string") setStatusFilter(p.status as ProductStatus | "");
+        if (typeof p.categoryId === "string") setCategoryId(p.categoryId);
+      }
+    } catch {}
     api<{ id: number; name: string }[]>("/categories").then(setCategories).catch(() => setCategories([]));
-  }, [user, router]);
+  }, [user, router, FILTER_KEY]);
 
   useEffect(() => {
     if (user?.role === "ADMIN") fetchList();
   }, [fetchList, user?.role]);
 
+  useEffect(() => {
+    localStorage.setItem(FILTER_KEY, JSON.stringify({ keyword, status: statusFilter, categoryId }));
+  }, [FILTER_KEY, keyword, statusFilter, categoryId]);
+
   async function handleStatusChange(productId: number, status: ProductStatus) {
+    const reason = prompt("상태 변경 사유를 입력하세요 (감사 로그 기록)");
+    if (reason === null) return;
     setUpdatingId(productId);
     setError("");
     try {
-      await api(`/admin/products/${productId}/status?status=${status}`, { method: "PATCH" });
+      await api(`/admin/products/${productId}/status?status=${status}&reason=${encodeURIComponent(reason)}`, { method: "PATCH" });
       fetchList();
     } catch (err) {
       setError(err instanceof Error ? err.message : "상태 변경 실패");
     } finally {
       setUpdatingId(null);
     }
+  }
+
+  async function handleBulkStatus(status: ProductStatus) {
+    if (selected.length === 0) return;
+    const reason = prompt("일괄 상태 변경 사유를 입력하세요 (감사 로그 기록)");
+    if (reason === null) return;
+    setError("");
+    try {
+      await api(`/admin/products/status/bulk?reason=${encodeURIComponent(reason)}`, {
+        method: "PATCH",
+        body: JSON.stringify({ productIds: selected, status }),
+      });
+      setSelected([]);
+      fetchList();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "일괄 상태 변경 실패");
+    }
+  }
+
+  function downloadCsv() {
+    const rows = [["id", "name", "status", "price", "stockQuantity", "sellerName"]].concat(
+      products.map((p) => [String(p.id), p.name, p.status, String(p.price), String(p.stockQuantity), p.sellerName ?? ""])
+    );
+    const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
+    const csv = rows.map((r) => r.map(esc).join(",")).join("\n");
+    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `admin-products-page-${(data?.page ?? 0) + 1}.csv`;
+    a.click();
+    URL.revokeObjectURL(url);
   }
 
   if (!user || user.role !== "ADMIN") return null;
@@ -96,6 +144,10 @@ export default function AdminProductsPage() {
           <option value="">전체 카테고리</option>
           {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
         </select>
+        <button type="button" onClick={downloadCsv} className="btn-secondary">CSV 내보내기</button>
+        <button type="button" disabled={selected.length === 0} onClick={() => handleBulkStatus("ON_SALE")} className="btn-secondary disabled:opacity-50">선택 판매중</button>
+        <button type="button" disabled={selected.length === 0} onClick={() => handleBulkStatus("SOLD_OUT")} className="btn-secondary disabled:opacity-50">선택 품절</button>
+        <button type="button" disabled={selected.length === 0} onClick={() => handleBulkStatus("DELETED")} className="btn-secondary disabled:opacity-50">선택 노출중단</button>
       </div>
       {error && (
         <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>
@@ -104,29 +156,65 @@ export default function AdminProductsPage() {
         <div className="empty-state"><p className="text-base">상품이 없습니다.</p></div>
       ) : (
         <>
-          <ul className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {products.map((p) => (
-              <li key={p.id} className={`card ${p.status === "DELETED" ? "opacity-75" : ""}`}>
-                <Link href={`/products/${p.id}`} className="relative mb-2 block aspect-square w-full overflow-hidden rounded-lg bg-zinc-100">
-                  {p.imageUrl ? <Image src={p.imageUrl} alt="" fill className="object-cover" sizes="200px" unoptimized /> : <span className="flex h-full items-center justify-center text-zinc-400 text-sm">이미지 없음</span>}
-                </Link>
-                <Link href={`/products/${p.id}`} className="font-medium text-zinc-900 hover:underline line-clamp-2">{p.name}</Link>
-                <p className="mt-1 text-sm text-zinc-600">{p.price.toLocaleString()}원 · {p.status}</p>
-                <div className="mt-2 flex flex-wrap gap-2">
-                  <select
-                    value={p.status}
-                    onChange={(e) => handleStatusChange(p.id, e.target.value as ProductStatus)}
-                    disabled={updatingId === p.id}
-                    className="input-field w-auto min-w-[90px] text-sm"
-                  >
-                    <option value="ON_SALE">판매중</option>
-                    <option value="SOLD_OUT">품절</option>
-                    <option value="DELETED">노출중단</option>
-                  </select>
-                </div>
-              </li>
-            ))}
-          </ul>
+          <div className="overflow-auto rounded-xl border border-zinc-200 bg-white">
+            <table className="min-w-full text-sm">
+              <thead className="bg-zinc-50 text-zinc-600">
+                <tr>
+                  <th className="px-3 py-2 text-left">
+                    <input
+                      type="checkbox"
+                      checked={products.length > 0 && selected.length === products.length}
+                      onChange={(e) => setSelected(e.target.checked ? products.map((p) => p.id) : [])}
+                    />
+                  </th>
+                  <th className="px-3 py-2 text-left">ID</th>
+                  <th className="px-3 py-2 text-left">상품명</th>
+                  <th className="px-3 py-2 text-left">판매자</th>
+                  <th className="px-3 py-2 text-right">가격</th>
+                  <th className="px-3 py-2 text-right">재고</th>
+                  <th className="px-3 py-2 text-left">상태</th>
+                  <th className="px-3 py-2 text-left">액션</th>
+                </tr>
+              </thead>
+              <tbody>
+                {products.map((p) => (
+                  <tr key={p.id} className="border-t border-zinc-100">
+                    <td className="px-3 py-2">
+                      <input
+                        type="checkbox"
+                        checked={selected.includes(p.id)}
+                        onChange={(e) => {
+                          setSelected((prev) =>
+                            e.target.checked ? [...prev, p.id] : prev.filter((id) => id !== p.id)
+                          );
+                        }}
+                      />
+                    </td>
+                    <td className="px-3 py-2 text-zinc-700">{p.id}</td>
+                    <td className="px-3 py-2">
+                      <Link href={`/admin/products/${p.id}`} className="font-medium text-zinc-900 hover:underline">{p.name}</Link>
+                    </td>
+                    <td className="px-3 py-2 text-zinc-700">{p.sellerName}</td>
+                    <td className="px-3 py-2 text-right text-zinc-700">{p.price.toLocaleString()}원</td>
+                    <td className="px-3 py-2 text-right text-zinc-700">{p.stockQuantity.toLocaleString()}</td>
+                    <td className="px-3 py-2 text-zinc-700">{p.status}</td>
+                    <td className="px-3 py-2">
+                      <select
+                        value={p.status}
+                        onChange={(e) => handleStatusChange(p.id, e.target.value as ProductStatus)}
+                        disabled={updatingId === p.id}
+                        className="input-field w-auto min-w-[100px] text-sm"
+                      >
+                        <option value="ON_SALE">판매중</option>
+                        <option value="SOLD_OUT">품절</option>
+                        <option value="DELETED">노출중단</option>
+                      </select>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
           <div className="mt-4 flex items-center justify-center gap-2">
             <button type="button" disabled={data?.first} onClick={() => setPage((p) => p - 1)} className="btn-secondary disabled:opacity-50">이전</button>
             <span className="text-sm text-zinc-600">{(data?.page ?? 0) + 1} / {data?.totalPages ?? 1}</span>
