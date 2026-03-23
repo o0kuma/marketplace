@@ -22,7 +22,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   if (isPaperSearch) {
     return (
-      <div className="flex min-h-screen flex-col bg-white">
+      <div className="flex min-h-screen flex-col bg-[var(--market-bg)]">
         <SearchTopBar />
         <main id="main-content" className="min-h-0 flex-1 overflow-hidden" tabIndex={-1}>
           {children}
@@ -32,7 +32,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="flex min-h-screen flex-col">
+    <div className="flex min-h-screen flex-col bg-[var(--market-bg)]">
       <Header />
       <main
         id="main-content"

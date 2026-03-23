@@ -310,7 +310,7 @@ export default function EditProductPage() {
 
   return (
     <div className="py-4">
-      <Link href="/seller/products" className="text-sm text-zinc-600 hover:underline">
+      <Link href="/seller/products" className="text-sm text-[var(--market-text-muted)] hover:underline">
         ← 내 상품
       </Link>
       <h1 className="section-title mt-4">상품 수정</h1>
@@ -368,20 +368,20 @@ export default function EditProductPage() {
               ))}
             </div>
           )}
-          {uploading && <p className="mt-2 text-sm text-zinc-500">업로드 중…</p>}
+          {uploading && <p className="mt-2 text-sm text-[var(--market-text-muted)]">업로드 중…</p>}
         </label>
         <label className="block">
           <span className="label">설명</span>
           <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} className="input-field w-full" />
         </label>
 
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-4">
+        <div className="rounded-lg border border-[var(--market-border)] bg-[var(--market-accent-subtle)] p-4">
           <label className="flex cursor-pointer items-center gap-2">
             <input
               type="checkbox"
               checked={useOptions}
               onChange={(e) => setUseOptions(e.target.checked)}
-              className="h-4 w-4 rounded border-zinc-300 text-teal-600"
+              className="h-4 w-4 rounded border-[var(--market-border)] text-[var(--market-accent)]"
             />
             <span className="label">옵션 상품으로 등록 (용량·색상 등)</span>
           </label>
@@ -405,12 +405,12 @@ export default function EditProductPage() {
             <div>
               <div className="mb-2 flex items-center justify-between">
                 <span className="label">옵션 그룹 (예: 용량, 색상)</span>
-                <button type="button" onClick={addOptionGroup} className="text-sm font-medium text-teal-600 hover:underline">
+                <button type="button" onClick={addOptionGroup} className="text-sm font-medium text-[var(--market-accent)] hover:underline">
                   + 그룹 추가
                 </button>
               </div>
               {optionGroups.map((g, gi) => (
-                <div key={gi} className="mb-4 rounded-lg border border-zinc-200 bg-white p-3">
+                <div key={gi} className="mb-4 rounded-lg border border-[var(--market-border)] bg-[var(--market-surface)] p-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <input
                       type="text"
@@ -419,7 +419,7 @@ export default function EditProductPage() {
                       onChange={(e) => updateOptionGroup(gi, "name", e.target.value)}
                       className="input-field w-32"
                     />
-                    <span className="text-sm text-zinc-500">옵션값:</span>
+                    <span className="text-sm text-[var(--market-text-muted)]">옵션값:</span>
                     {g.values.map((val, vi) => (
                       <span key={vi} className="flex items-center gap-1">
                         <input
@@ -439,7 +439,7 @@ export default function EditProductPage() {
                         </button>
                       </span>
                     ))}
-                    <button type="button" onClick={() => addOptionValue(gi)} className="text-sm text-teal-600 hover:underline">
+                    <button type="button" onClick={() => addOptionValue(gi)} className="text-sm text-[var(--market-accent)] hover:underline">
                       + 값 추가
                     </button>
                     <button type="button" onClick={() => removeOptionGroup(gi)} className="ml-auto text-sm text-red-600 hover:underline">
@@ -453,28 +453,28 @@ export default function EditProductPage() {
               <div>
                 <div className="mb-2 flex items-center justify-between">
                   <span className="label">옵션 조합 (가격·재고)</span>
-                  <button type="button" onClick={addVariantRow} className="text-sm font-medium text-teal-600 hover:underline">
+                  <button type="button" onClick={addVariantRow} className="text-sm font-medium text-[var(--market-accent)] hover:underline">
                     + 행 추가
                   </button>
                 </div>
                 <div className="overflow-x-auto">
-                  <table className="w-full min-w-[500px] border border-zinc-200 text-sm">
+                  <table className="w-full min-w-[500px] border border-[var(--market-border)] text-sm">
                     <thead>
-                      <tr className="bg-zinc-100">
+                      <tr className="bg-[var(--market-accent-subtle)]">
                         {optionGroups.map((g, i) => (
-                          <th key={i} className="border-b border-zinc-200 px-2 py-2 text-left font-medium">
+                          <th key={i} className="border-b border-[var(--market-border)] px-2 py-2 text-left font-medium">
                             {g.name || `옵션${i + 1}`}
                           </th>
                         ))}
-                        <th className="border-b border-zinc-200 px-2 py-2 text-left font-medium">가격(원)</th>
-                        <th className="border-b border-zinc-200 px-2 py-2 text-left font-medium">재고</th>
-                        <th className="border-b border-zinc-200 px-2 py-2 text-left font-medium">SKU</th>
-                        <th className="w-16 border-b border-zinc-200 px-2 py-2" />
+                        <th className="border-b border-[var(--market-border)] px-2 py-2 text-left font-medium">가격(원)</th>
+                        <th className="border-b border-[var(--market-border)] px-2 py-2 text-left font-medium">재고</th>
+                        <th className="border-b border-[var(--market-border)] px-2 py-2 text-left font-medium">SKU</th>
+                        <th className="w-16 border-b border-[var(--market-border)] px-2 py-2" />
                       </tr>
                     </thead>
                     <tbody>
                       {variants.map((row, ri) => (
-                        <tr key={ri} className="border-b border-zinc-100">
+                        <tr key={ri} className="border-b border-[var(--market-border)]">
                           {optionGroups.map((g, gi) => (
                             <td key={gi} className="px-2 py-1.5">
                               <select

@@ -2,34 +2,36 @@
 
 import { useAuth } from "@/context/AuthContext";
 import Link from "next/link";
+import ThemeToggle from "./ThemeToggle";
 
 /** Slim header for full-screen paper search (btbmarket-style). */
 export default function SearchTopBar() {
   const { user, loading } = useAuth();
 
   return (
-    <header className="flex h-14 shrink-0 items-center justify-between border-b border-zinc-200 bg-white px-4 lg:px-8">
-      <Link href="/" className="text-lg font-semibold tracking-tight text-zinc-900">
-        BTB<span className="text-teal-700">Market</span>
-        <span className="ml-2 text-xs font-normal text-zinc-500">Research</span>
+    <header className="flex h-14 shrink-0 items-center justify-between border-b border-[var(--market-border)] bg-white px-4 lg:px-8">
+      <Link href="/" className="text-lg font-semibold tracking-tight text-[var(--market-text)]">
+        BTB<span className="text-[var(--market-accent)]">Market</span>
+        <span className="ml-2 text-xs font-normal text-[var(--market-text-muted)]">Research</span>
       </Link>
       <nav className="flex items-center gap-3 text-sm sm:gap-4">
-        <Link href="/products" className="text-zinc-600 hover:text-zinc-900">
+        <ThemeToggle />
+        <Link href="/products" className="text-[var(--market-text-muted)] hover:text-[var(--market-text)]">
           Shop
         </Link>
         {loading ? (
-          <span className="text-zinc-400">…</span>
+          <span className="text-[var(--market-text-muted)]">…</span>
         ) : user ? (
-          <Link href="/mypage" className="text-zinc-600 hover:text-zinc-900">
+          <Link href="/mypage" className="text-[var(--market-text-muted)] hover:text-[var(--market-text)]">
             My Page
           </Link>
         ) : (
           <>
-            <Link href="/login" className="text-zinc-600 hover:text-zinc-900">
+            <Link href="/login" className="text-[var(--market-text-muted)] hover:text-[var(--market-text)]">
               Sign in
             </Link>
-            <span className="text-zinc-300">|</span>
-            <Link href="/signup" className="font-medium text-teal-800 hover:underline">
+            <span className="text-[var(--market-border)]">|</span>
+            <Link href="/signup" className="font-medium text-[var(--market-accent)] hover:underline">
               Join
             </Link>
           </>

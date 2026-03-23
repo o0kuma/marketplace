@@ -136,14 +136,14 @@ export default function AdminCategoriesPage() {
           {saving ? "처리 중..." : "추가"}
         </button>
       </form>
-      <div className="mt-6 overflow-x-auto rounded-xl border border-zinc-200 bg-white">
-        <table className="w-full border-collapse text-sm">
-          <thead className="bg-zinc-50">
+      <div className="admin-table-wrap mt-6">
+        <table className="admin-table">
+          <thead>
             <tr>
-              <th className="border-b border-zinc-200 px-3 py-2 text-left">ID</th>
-              <th className="border-b border-zinc-200 px-3 py-2 text-left">카테고리명</th>
-              <th className="border-b border-zinc-200 px-3 py-2 text-right">상품수</th>
-              <th className="border-b border-zinc-200 px-3 py-2 text-left">작업</th>
+              <th className="text-left">ID</th>
+              <th className="text-left">카테고리명</th>
+              <th className="text-right">상품수</th>
+              <th className="text-left">작업</th>
             </tr>
           </thead>
           <tbody>
@@ -155,7 +155,7 @@ export default function AdminCategoriesPage() {
               </tr>
             ) : (
               list.map((c) => (
-                <tr key={c.id} className="border-t border-zinc-100">
+                <tr key={c.id}>
                   <td className="px-3 py-2 text-zinc-700">{c.id}</td>
                   <td className="px-3 py-2">
                     {editingId === c.id ? (

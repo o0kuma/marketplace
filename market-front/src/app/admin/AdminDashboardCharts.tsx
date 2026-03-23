@@ -23,13 +23,13 @@ export function OrdersBarChart({ data }: { data: DailyTrendPoint[] }) {
           const barH = Math.round((p.orderCount / max) * h);
           return (
             <div key={p.date} className="flex flex-1 flex-col items-center justify-end gap-1">
-              <span className="text-[10px] font-medium text-zinc-600">{p.orderCount > 0 ? p.orderCount : ""}</span>
+              <span className="text-[10px] font-medium text-[var(--market-text-muted)]">{p.orderCount > 0 ? p.orderCount : ""}</span>
               <div
-                className="w-full max-w-[28px] rounded-t bg-slate-600 transition-[height] duration-300"
+                className="w-full max-w-[28px] rounded-t bg-[var(--market-accent)] transition-[height] duration-300"
                 style={{ height: Math.max(barH, 2), minHeight: p.orderCount > 0 ? 4 : 2 }}
                 title={`${p.date}: ${p.orderCount}건`}
               />
-              <span className="text-[9px] text-zinc-500">{formatShortDate(p.date)}</span>
+              <span className="text-[9px] text-[var(--market-text-muted)]">{formatShortDate(p.date)}</span>
             </div>
           );
         })}
@@ -60,28 +60,28 @@ export function SalesLineChart({ data }: { data: DailyTrendPoint[] }) {
       <svg viewBox={`0 0 ${w} ${h + 20}`} className="h-auto w-full min-w-[320px]" preserveAspectRatio="xMidYMid meet">
         <defs>
           <linearGradient id="salesFill" x1="0" y1="0" x2="0" y2="1">
-            <stop offset="0%" stopColor="rgb(22 101 52)" stopOpacity="0.25" />
-            <stop offset="100%" stopColor="rgb(22 101 52)" stopOpacity="0" />
+            <stop offset="0%" stopColor="var(--market-secondary)" stopOpacity="0.35" />
+            <stop offset="100%" stopColor="var(--market-secondary)" stopOpacity="0" />
           </linearGradient>
         </defs>
         <path d={areaD} fill="url(#salesFill)" />
-        <path d={pathD} fill="none" stroke="rgb(22 101 52)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+        <path d={pathD} fill="none" stroke="var(--market-secondary)" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
         {data.map((p, i) => {
           const x = pad + i * step;
           const y = h - pad - (p.sales / maxSales) * (h - pad * 2);
           return (
-            <circle key={p.date} cx={x} cy={y} r={p.sales > 0 ? 3 : 1.5} fill={p.sales > 0 ? "rgb(22 101 52)" : "rgb(161 161 170)"}>
+            <circle key={p.date} cx={x} cy={y} r={p.sales > 0 ? 3 : 1.5} fill={p.sales > 0 ? "var(--market-secondary)" : "var(--market-text-muted)"}>
               <title>{`${p.date}: ${Number(p.sales).toLocaleString()}원`}</title>
             </circle>
           );
         })}
         {data.map((p, i) => (
-          <text key={`l-${p.date}`} x={pad + i * step} y={h + 14} textAnchor="middle" className="fill-zinc-500 text-[9px]">
+          <text key={`l-${p.date}`} x={pad + i * step} y={h + 14} textAnchor="middle" className="fill-[var(--market-text-muted)] text-[9px]">
             {formatShortDate(p.date)}
           </text>
         ))}
       </svg>
-      <p className="mt-1 text-center text-xs text-zinc-500">
+      <p className="mt-1 text-center text-xs text-[var(--market-text-muted)]">
         최고 일 매출 {Number(maxSales).toLocaleString()}원 (14일 구간)
       </p>
     </div>

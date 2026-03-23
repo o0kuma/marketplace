@@ -243,14 +243,14 @@ export default function MypagePage() {
       <h1 className="section-title">마이페이지</h1>
       {error && <p className="rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
       <div className="card">
-        <h2 className="mb-4 text-lg font-semibold text-zinc-900">사용자 정보</h2>
+        <h2 className="mb-4 text-lg font-semibold text-[var(--market-text)]">사용자 정보</h2>
         <div className="mb-6 flex items-center gap-4">
-          <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-zinc-200 bg-teal-50">
+          <div className="relative h-20 w-20 overflow-hidden rounded-full border-2 border-[var(--market-border)] bg-[var(--market-accent-subtle)]">
             {member?.profileImageUrl ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img src={member.profileImageUrl} alt="" className="h-full w-full object-cover" />
             ) : (
-              <span className="flex h-full w-full items-center justify-center text-lg font-semibold text-teal-900">
+              <span className="flex h-full w-full items-center justify-center text-lg font-semibold text-[var(--market-accent)]">
                 {(name || user.name || "?").slice(0, 2).toUpperCase()}
               </span>
             )}
@@ -266,12 +266,12 @@ export default function MypagePage() {
                 onChange={handleProfilePhotoChange}
               />
             </label>
-            <p className="mt-1 text-xs text-zinc-500">JPG, PNG, GIF, WebP · 헤더 메뉴에 반영됩니다.</p>
+            <p className="mt-1 text-xs text-[var(--market-text-muted)]">JPG, PNG, GIF, WebP · 헤더 메뉴에 반영됩니다.</p>
           </div>
         </div>
         <form onSubmit={handleSubmit} className="flex flex-col gap-5">
           <label className="block"><span className="label">이름</span><input type="text" value={name} onChange={(e) => setName(e.target.value)} className="input-field" /></label>
-          <label className="block"><span className="label">이메일</span><input type="email" value={member?.email ?? ""} disabled className="input-field bg-zinc-50" /></label>
+          <label className="block"><span className="label">이메일</span><input type="email" value={member?.email ?? ""} disabled className="input-field bg-[var(--market-accent-subtle)]" /></label>
           <label className="block"><span className="label">전화번호</span><input type="tel" value={phone} onChange={(e) => setPhone(e.target.value)} className="input-field" placeholder="010-0000-0000" /></label>
           <label className="block"><span className="label">주소</span><input type="text" value={address} onChange={(e) => setAddress(e.target.value)} className="input-field" placeholder="주소 입력" /></label>
           <button type="submit" disabled={submitting} className="btn-primary mt-1 w-fit">{submitting ? "저장 중..." : "저장"}</button>
@@ -279,37 +279,37 @@ export default function MypagePage() {
       </div>
       {passwordSuccess && <p className="rounded-lg bg-green-50 px-4 py-2 text-sm text-green-800">{passwordSuccess}</p>}
       <div className="card">
-        <h2 className="mb-3 text-lg font-semibold text-zinc-900">내 활동</h2>
+        <h2 className="mb-3 text-lg font-semibold text-[var(--market-text)]">내 활동</h2>
         <ul className="space-y-2 text-sm">
           <li>
-            <Link href="/orders" className="text-zinc-700 underline hover:text-zinc-900">주문 내역</Link>
-            <span className="ml-1 text-zinc-500">· 구매 확정된 상품에 리뷰를 작성할 수 있습니다.</span>
+            <Link href="/orders" className="text-[var(--market-text)] underline hover:text-[var(--market-accent)]">주문 내역</Link>
+            <span className="ml-1 text-[var(--market-text-muted)]">· 구매 확정된 상품에 리뷰를 작성할 수 있습니다.</span>
           </li>
           <li>
-            <Link href="/products" className="text-zinc-700 underline hover:text-zinc-900">상품 목록</Link>
-            <span className="ml-1 text-zinc-500">· 상품 상세에서 문의를 남기실 수 있습니다.</span>
+            <Link href="/products" className="text-[var(--market-text)] underline hover:text-[var(--market-accent)]">상품 목록</Link>
+            <span className="ml-1 text-[var(--market-text-muted)]">· 상품 상세에서 문의를 남기실 수 있습니다.</span>
           </li>
         </ul>
       </div>
 
       {/* Wishlist */}
       <div className="card">
-        <h2 className="mb-3 text-lg font-semibold text-zinc-900">찜 목록</h2>
+        <h2 className="mb-3 text-lg font-semibold text-[var(--market-text)]">찜 목록</h2>
         {wishlist && wishlist.content.length > 0 ? (
           <ul className="space-y-3">
             {wishlist.content.map((item) => (
-              <li key={item.wishlistId} className="flex items-center gap-3 rounded-lg border border-zinc-100 p-3">
+              <li key={item.wishlistId} className="flex items-center gap-3 rounded-lg border border-[var(--market-border)] p-3">
                 <Link href={`/products/${item.productId}`} className="flex min-w-0 flex-1 items-center gap-3">
-                  <span className="relative block h-14 w-14 shrink-0 overflow-hidden rounded bg-zinc-100">
+                  <span className="relative block h-14 w-14 shrink-0 overflow-hidden rounded bg-[var(--market-accent-subtle)]">
                     {item.imageUrl ? (
                       <Image src={item.imageUrl} alt="" fill className="object-cover" sizes="56px" unoptimized />
                     ) : (
-                      <span className="flex h-full w-full items-center justify-center text-xs text-zinc-400">이미지 없음</span>
+                      <span className="flex h-full w-full items-center justify-center text-xs text-[var(--market-text-muted)]">이미지 없음</span>
                     )}
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block truncate font-medium text-zinc-900">{item.productName}</span>
-                    <span className="text-sm text-zinc-500">{item.price.toLocaleString()}원</span>
+                    <span className="block truncate font-medium text-[var(--market-text)]">{item.productName}</span>
+                    <span className="text-sm text-[var(--market-text-muted)]">{item.price.toLocaleString()}원</span>
                   </span>
                 </Link>
                 <button
@@ -322,7 +322,7 @@ export default function MypagePage() {
                       setError("찜 해제에 실패했습니다.");
                     }
                   }}
-                  className="shrink-0 rounded border border-zinc-200 px-3 py-1.5 text-sm text-zinc-600 hover:bg-zinc-50"
+                  className="shrink-0 rounded border border-[var(--market-border)] px-3 py-1.5 text-sm text-[var(--market-text-muted)] hover:bg-[var(--market-accent-subtle)]"
                 >
                   찜 해제
                 </button>
@@ -330,7 +330,7 @@ export default function MypagePage() {
             ))}
           </ul>
         ) : (
-          <p className="text-sm text-zinc-500">찜한 상품이 없습니다. 상품 목록에서 하트를 눌러 찜해 보세요.</p>
+          <p className="text-sm text-[var(--market-text-muted)]">찜한 상품이 없습니다. 상품 목록에서 하트를 눌러 찜해 보세요.</p>
         )}
       </div>
 
@@ -468,9 +468,9 @@ export default function MypagePage() {
           </form>
         )}
       </div>
-      <div className="card border-red-200 bg-red-50/30">
+      <div className="card border-red-300/60 bg-red-500/10">
         <h2 className="text-lg font-semibold text-red-700">회원 탈퇴</h2>
-        <p className="mt-1 text-sm text-zinc-600">탈퇴 시 계정이 비활성화되며 복구할 수 없습니다.</p>
+        <p className="mt-1 text-sm text-[var(--market-text-muted)]">탈퇴 시 계정이 비활성화되며 복구할 수 없습니다.</p>
         <div className="mt-4 flex flex-col gap-3">
           <label className="block max-w-xs"><span className="label">탈퇴 확인</span><input type="text" placeholder='"탈퇴합니다" 입력' value={withdrawConfirm} onChange={(e) => setWithdrawConfirm(e.target.value)} className="input-field border-red-200 focus:border-red-400 focus:ring-red-400/20" /></label>
           <button type="button" onClick={handleWithdraw} disabled={withdrawConfirm !== "탈퇴합니다" || withdrawing} className="w-fit rounded-lg border border-red-400 bg-red-600 px-4 py-2.5 text-sm font-medium text-white shadow-sm hover:bg-red-700 disabled:opacity-50">
@@ -478,10 +478,10 @@ export default function MypagePage() {
           </button>
         </div>
       </div>
-      <p className="flex gap-4 text-sm text-zinc-600">
-        <Link href="/orders" className="underline hover:text-zinc-900">주문 내역</Link>
-        <Link href="/terms" className="underline hover:text-zinc-900">이용약관</Link>
-        <Link href="/privacy" className="underline hover:text-zinc-900">개인정보처리방침</Link>
+      <p className="flex gap-4 text-sm text-[var(--market-text-muted)]">
+        <Link href="/orders" className="underline hover:text-[var(--market-accent)]">주문 내역</Link>
+        <Link href="/terms" className="underline hover:text-[var(--market-accent)]">이용약관</Link>
+        <Link href="/privacy" className="underline hover:text-[var(--market-accent)]">개인정보처리방침</Link>
       </p>
     </div>
   );

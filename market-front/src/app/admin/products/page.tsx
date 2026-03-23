@@ -345,11 +345,11 @@ export default function AdminProductsPage() {
         </div>
       ) : (
         <>
-          <div className="overflow-auto rounded-xl border border-zinc-200 bg-white">
-            <table className="min-w-full text-sm">
-              <thead className="bg-zinc-50 text-zinc-600">
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left">
+                  <th className="text-left">
                     <input
                       type="checkbox"
                       checked={products.length > 0 && selected.length === products.length}
@@ -367,7 +367,7 @@ export default function AdminProductsPage() {
               </thead>
               <tbody>
                 {products.map((p) => (
-                  <tr key={p.id} className="border-t border-zinc-100">
+                  <tr key={p.id}>
                     <td className="px-3 py-2">
                       <input
                         type="checkbox"

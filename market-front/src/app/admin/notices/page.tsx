@@ -89,21 +89,21 @@ export default function AdminNoticesPage() {
         </select>
       </div>
       {error && <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
-      <div className="overflow-x-auto rounded-xl border border-zinc-200">
-        <table className="w-full border-collapse text-sm">
-          <thead className="bg-zinc-50">
+      <div className="admin-table-wrap">
+        <table className="admin-table">
+          <thead>
             <tr>
-              <th className="border-b border-zinc-200 px-3 py-2 text-left">ID</th>
-              <th className="border-b border-zinc-200 px-3 py-2 text-left">제목</th>
-              <th className="border-b border-zinc-200 px-3 py-2 text-left">고정</th>
-              <th className="border-b border-zinc-200 px-3 py-2 text-left">등록일</th>
-              <th className="border-b border-zinc-200 px-3 py-2 text-left">수정일</th>
-              <th className="border-b border-zinc-200 px-3 py-2 text-left">작업</th>
+              <th className="text-left">ID</th>
+              <th className="text-left">제목</th>
+              <th className="text-left">고정</th>
+              <th className="text-left">등록일</th>
+              <th className="text-left">수정일</th>
+              <th className="text-left">작업</th>
             </tr>
           </thead>
           <tbody>
             {(data?.content ?? []).map((n) => (
-              <tr key={n.id} className="border-b border-zinc-100">
+              <tr key={n.id}>
                 <td className="px-3 py-2 text-zinc-700">{n.id}</td>
                 <td className="px-3 py-2">
                   <Link href={`/notices/${n.id}`} className="text-zinc-600 hover:underline" target="_blank">
@@ -115,7 +115,7 @@ export default function AdminNoticesPage() {
                 <td className="px-3 py-2 text-zinc-600">{new Date(n.createdAt).toLocaleString("ko-KR")}</td>
                 <td className="px-3 py-2 text-zinc-600">{new Date(n.updatedAt).toLocaleString("ko-KR")}</td>
                 <td className="px-3 py-2">
-                  <Link href={`/admin/notices/${n.id}/edit`} className="text-sm text-slate-700 hover:underline">
+                  <Link href={`/admin/notices/${n.id}/edit`} className="text-sm text-zinc-700 hover:underline">
                     수정
                   </Link>
                   <button type="button" onClick={() => handleDelete(n.id)} className="ml-3 text-sm text-red-600 hover:underline">

@@ -143,18 +143,18 @@ export default function CartPage() {
     <div>
       <p className="section-eyebrow">Your bag</p>
       <h1 className="section-title mb-2">Shopping cart</h1>
-      <p className="mb-8 text-stone-500">Review items before checkout.</p>
+      <p className="mb-8 text-[var(--market-text-muted)]">Review items before checkout.</p>
       {error && <p className="mb-4 rounded-2xl bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
       {cart?.items && cart.items.length > 0 ? (
         <div className="grid gap-10 lg:grid-cols-[1fr_minmax(300px,380px)] lg:items-start">
           <div>
             <div className="mb-6 flex flex-wrap items-center gap-3">
-              <label className="flex items-center gap-2 text-sm font-medium text-stone-700">
+              <label className="flex items-center gap-2 text-sm font-medium text-[var(--market-text)]">
                 <input
                   type="checkbox"
                   checked={allSelected}
                   onChange={toggleSelectAll}
-                  className="h-4 w-4 rounded border-stone-300 text-teal-800 focus:ring-teal-600"
+                  className="h-4 w-4 rounded border-[var(--market-border)] text-[var(--market-accent)] focus:ring-[var(--market-accent)]"
                 />
                 Select all
               </label>
@@ -162,7 +162,7 @@ export default function CartPage() {
                 type="button"
                 onClick={removeSelected}
                 disabled={selectedIds.size === 0 || deletingIds.size > 0}
-                className="text-sm font-medium text-red-600 hover:underline disabled:opacity-50"
+                  className="text-sm font-medium text-red-500 hover:underline disabled:opacity-50"
               >
                 Remove selected
               </button>
@@ -171,25 +171,25 @@ export default function CartPage() {
               {cart.items.map((item) => (
                 <li
                   key={item.id}
-                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-stone-200 bg-white p-5 shadow-sm"
+                  className="flex flex-wrap items-center justify-between gap-4 rounded-2xl border border-[var(--market-border)] bg-[var(--market-surface)] p-5 shadow-sm"
                 >
                   <label className="flex min-w-0 flex-1 cursor-pointer items-start gap-4">
                     <input
                       type="checkbox"
                       checked={selectedIds.has(item.id)}
                       onChange={() => toggleSelect(item.id)}
-                      className="mt-1 h-4 w-4 rounded border-stone-300 text-teal-800"
+                      className="mt-1 h-4 w-4 rounded border-[var(--market-border)] text-[var(--market-accent)]"
                     />
                     <div className="min-w-0">
-                      <Link href={`/products/${item.productId}`} className="font-semibold text-stone-900 hover:text-teal-800">
+                      <Link href={`/products/${item.productId}`} className="font-semibold text-[var(--market-text)] hover:text-[var(--market-accent)]">
                         {item.productName}
                       </Link>
                       {item.optionSummary && (
-                        <p className="mt-0.5 text-sm text-stone-600">{item.optionSummary}</p>
+                        <p className="mt-0.5 text-sm text-[var(--market-text-muted)]">{item.optionSummary}</p>
                       )}
-                      <p className="mt-1 text-sm text-stone-500">
+                      <p className="mt-1 text-sm text-[var(--market-text-muted)]">
                         ₩{item.price.toLocaleString()} × {item.quantity} ={" "}
-                        <span className="font-medium text-stone-800">₩{item.subtotal.toLocaleString()}</span>
+                        <span className="font-medium text-[var(--market-text)]">₩{item.subtotal.toLocaleString()}</span>
                       </p>
                     </div>
                   </label>
@@ -207,7 +207,7 @@ export default function CartPage() {
                     <button
                       type="button"
                       onClick={() => removeItem(item.id)}
-                      className="text-sm font-medium text-stone-500 hover:text-red-600"
+                      className="text-sm font-medium text-[var(--market-text-muted)] hover:text-red-500"
                     >
                       Remove
                     </button>
@@ -217,12 +217,12 @@ export default function CartPage() {
             </ul>
           </div>
           <aside className="market-sticky-summary space-y-6">
-            <h2 className="text-lg font-semibold text-stone-900">Order summary</h2>
-            <div className="flex justify-between text-stone-600">
+            <h2 className="text-lg font-semibold text-[var(--market-text)]">Order summary</h2>
+            <div className="flex justify-between text-[var(--market-text-muted)]">
               <span>Subtotal</span>
-              <span className="font-medium text-stone-900">₩{cart.totalAmount.toLocaleString()}</span>
+              <span className="font-medium text-[var(--market-text)]">₩{cart.totalAmount.toLocaleString()}</span>
             </div>
-            <p className="text-xs text-stone-500">Shipping calculated at checkout.</p>
+            <p className="text-xs text-[var(--market-text-muted)]">Shipping calculated at checkout.</p>
             <button
               type="button"
               onClick={() => goToCheckout(selectedItems)}
@@ -238,8 +238,8 @@ export default function CartPage() {
         </div>
       ) : (
         <div className="empty-state max-w-lg mx-auto">
-          <p className="text-lg font-medium text-stone-800">Your cart is empty</p>
-          <p className="mt-2 text-sm text-stone-500">Discover something you love.</p>
+          <p className="text-lg font-medium text-[var(--market-text)]">Your cart is empty</p>
+          <p className="mt-2 text-sm text-[var(--market-text-muted)]">Discover something you love.</p>
           <Link href="/products" className="btn-primary mt-8 inline-flex">
             Continue shopping
           </Link>

@@ -90,7 +90,7 @@ export default function ProductsCatalog() {
       <div className="mb-10">
         <p className="section-eyebrow">상품</p>
         <h1 className="section-title m-0">전체 상품</h1>
-        <p className="mt-2 text-stone-500">카테고리·가격·정렬로 원하는 상품을 찾아 보세요.</p>
+        <p className="mt-2 text-[var(--market-text-muted)]">카테고리·가격·정렬로 원하는 상품을 찾아 보세요.</p>
       </div>
       <div className="lg:grid lg:grid-cols-[minmax(220px,260px)_1fr] lg:gap-10 xl:gap-14">
         <aside className="mb-8 lg:mb-0">
@@ -214,7 +214,7 @@ export default function ProductsCatalog() {
                     <span className="absolute right-2 top-2 z-10" onClick={(e) => e.preventDefault()}>
                       <WishlistButton productId={p.id} variant="compact" />
                     </span>
-                    <span className="relative block aspect-[4/5] w-full overflow-hidden bg-stone-100">
+                    <span className="relative block aspect-[4/5] w-full overflow-hidden bg-[var(--market-accent-subtle)]">
                       {p.imageUrl ? (
                         <Image
                           src={p.imageUrl}
@@ -225,13 +225,13 @@ export default function ProductsCatalog() {
                           unoptimized
                         />
                       ) : (
-                        <span className="flex h-full w-full items-center justify-center text-sm text-stone-400">이미지 없음</span>
+                        <span className="flex h-full w-full items-center justify-center text-sm text-[var(--market-text-muted)]">이미지 없음</span>
                       )}
                     </span>
                     <div className="p-4">
-                      <h2 className="line-clamp-2 text-sm font-medium text-stone-900">{p.name}</h2>
-                      <p className="mt-2 text-base font-semibold text-stone-900">₩{p.price.toLocaleString()}</p>
-                      <p className="mt-1 text-xs text-stone-500">{p.sellerName}</p>
+                      <h2 className="line-clamp-2 text-sm font-medium text-[var(--market-text)]">{p.name}</h2>
+                      <p className="mt-2 text-base font-semibold text-[var(--market-text)]">₩{p.price.toLocaleString()}</p>
+                      <p className="mt-1 text-xs text-[var(--market-text-muted)]">{p.sellerName}</p>
                       {p.status !== "ON_SALE" && (
                         <span className="mt-2 inline-block text-xs font-medium text-amber-700">
                           {p.status === "SOLD_OUT" ? "품절" : "판매 불가"}
@@ -244,7 +244,7 @@ export default function ProductsCatalog() {
             </ul>
           ) : (
             <div className="empty-state">
-              <p className="text-base font-medium text-stone-700">조건에 맞는 상품이 없습니다</p>
+              <p className="text-base font-medium text-[var(--market-text)]">조건에 맞는 상품이 없습니다</p>
               <p className="mt-1 text-sm">검색어나 카테고리를 바꿔 보세요.</p>
             </div>
           )}
@@ -264,7 +264,7 @@ export default function ProductsCatalog() {
                   key={pageNum}
                   type="button"
                   onClick={() => setPage(pageNum)}
-                  className={`min-w-10 rounded-full px-3 py-2 text-sm font-medium ${data.page === pageNum ? "bg-teal-800 text-white" : "border border-stone-200 bg-white text-stone-700 hover:bg-stone-50"}`}
+                  className={`min-w-10 rounded-full px-3 py-2 text-sm font-medium ${data.page === pageNum ? "bg-[var(--market-accent)] text-white" : "border border-[var(--market-border)] bg-[var(--market-surface)] text-[var(--market-text)] hover:bg-[var(--market-accent-subtle)]"}`}
                 >
                   {pageNum + 1}
                 </button>
@@ -273,7 +273,7 @@ export default function ProductsCatalog() {
             <button type="button" disabled={data.last} onClick={() => setPage((x) => x + 1)} className="btn-secondary disabled:opacity-50">
               다음
             </button>
-            <span className="ml-2 text-sm text-stone-500">
+            <span className="ml-2 text-sm text-[var(--market-text-muted)]">
               {data.page + 1} / {data.totalPages || 1}
             </span>
           </div>

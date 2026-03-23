@@ -71,7 +71,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
         aria-haspopup="menu"
         aria-controls={menuId}
         onClick={() => setOpen((v) => !v)}
-        className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-stone-200 bg-teal-50 text-sm font-semibold text-teal-900 shadow-sm outline-none transition hover:border-teal-400 hover:ring-2 hover:ring-teal-600/20 focus-visible:ring-2 focus-visible:ring-teal-600 focus-visible:ring-offset-2"
+        className="flex h-10 w-10 items-center justify-center overflow-hidden rounded-full border-2 border-[var(--market-border)] bg-[var(--market-accent-subtle)] text-sm font-semibold text-[var(--market-accent)] shadow-sm outline-none transition hover:border-[var(--market-accent)] hover:ring-2 hover:ring-[var(--market-accent)]/20 focus-visible:ring-2 focus-visible:ring-[var(--market-accent)] focus-visible:ring-offset-2"
         title={user.name}
       >
         {profileImageUrl ? (
@@ -91,12 +91,12 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
           id={menuId}
           role="menu"
           aria-labelledby="user-menu-trigger"
-          className="absolute right-0 z-[60] mt-2 w-72 origin-top-right rounded-xl border border-stone-200 bg-white py-2 shadow-lg ring-1 ring-black/5"
+          className="absolute right-0 z-[60] mt-2 w-72 origin-top-right rounded-xl border border-[var(--market-border)] bg-white py-2 shadow-lg ring-1 ring-[var(--market-border)]"
         >
-          <div className="border-b border-stone-100 px-4 py-3">
-            <p className="truncate text-sm font-semibold text-stone-900">{user.name}</p>
-            <p className="mt-0.5 truncate text-xs text-stone-500">{user.email}</p>
-            <span className="mt-2 inline-block rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-medium tracking-wide text-stone-600">
+          <div className="border-b border-[var(--market-border)] px-4 py-3">
+            <p className="truncate text-sm font-semibold text-[var(--market-text)]">{user.name}</p>
+            <p className="mt-0.5 truncate text-xs text-[var(--market-text-muted)]">{user.email}</p>
+            <span className="mt-2 inline-block rounded-full bg-[var(--market-accent-subtle)] px-2.5 py-0.5 text-[11px] font-medium tracking-wide text-[var(--market-accent)]">
               {roleLabel(user.role)}
             </span>
           </div>
@@ -106,7 +106,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
               href="/mypage"
               role="menuitem"
               onClick={close}
-              className="block px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
+              className="block px-4 py-2.5 text-sm font-medium text-[var(--market-text)] hover:bg-[var(--market-accent-subtle)]"
             >
               프로필 · 계정
             </Link>
@@ -115,8 +115,8 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
                 href="/seller"
                 role="menuitem"
                 onClick={close}
-                className={`block px-4 py-2.5 text-sm font-medium hover:bg-stone-50 ${
-                  sellerActive ? "text-teal-800" : "text-stone-700"
+                className={`block px-4 py-2.5 text-sm font-medium hover:bg-[var(--market-accent-subtle)] ${
+                  sellerActive ? "text-[var(--market-accent)]" : "text-[var(--market-text)]"
                 }`}
               >
                 판매자 센터
@@ -127,8 +127,8 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
                 href="/admin"
                 role="menuitem"
                 onClick={close}
-                className={`block px-4 py-2.5 text-sm font-medium hover:bg-stone-50 ${
-                  adminActive ? "text-teal-800" : "text-stone-700"
+                className={`block px-4 py-2.5 text-sm font-medium hover:bg-[var(--market-accent-subtle)] ${
+                  adminActive ? "text-[var(--market-accent)]" : "text-[var(--market-text)]"
                 }`}
               >
                 관리자 콘솔
@@ -136,7 +136,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
             )}
           </div>
 
-          <div className="border-t border-stone-100 pt-1">
+          <div className="border-t border-[var(--market-border)] pt-1">
             <button
               type="button"
               role="menuitem"
@@ -144,7 +144,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
                 close();
                 logout();
               }}
-              className="w-full px-4 py-2.5 text-left text-sm font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-800"
+              className="w-full px-4 py-2.5 text-left text-sm font-medium text-[var(--market-text-muted)] hover:bg-[var(--market-accent-subtle)] hover:text-[var(--market-text)]"
             >
               로그아웃
             </button>

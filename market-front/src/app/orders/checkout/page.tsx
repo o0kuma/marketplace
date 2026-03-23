@@ -293,7 +293,7 @@ function CheckoutContent() {
   }
   if (items.length === 0) {
     return (
-      <p className="py-8 text-zinc-600">
+      <p className="py-8 text-[var(--market-text-muted)]">
         주문할 상품이 없습니다.{" "}
         <Link href="/products" className="underline">
           상품 목록
@@ -316,41 +316,41 @@ function CheckoutContent() {
     <div className="mx-auto max-w-lg space-y-6">
       <h1 className="section-title">주문하기</h1>
       {fromCart && (
-        <p className="text-sm text-zinc-500">장바구니에서 선택한 상품으로 주문합니다.</p>
+        <p className="text-sm text-[var(--market-text-muted)]">장바구니에서 선택한 상품으로 주문합니다.</p>
       )}
       <div className="card space-y-2">
-        <h2 className="text-sm font-semibold text-zinc-700">주문 상품</h2>
+        <h2 className="text-sm font-semibold text-[var(--market-text)]">주문 상품</h2>
         {validItems.map((it) => {
           const unitPrice = it.displayPrice ?? it.product!.price;
           return (
             <p key={`${it.productId}-${it.cartItemId ?? ""}-${it.productVariantId ?? ""}`} className="text-sm">
-              <Link href={`/products/${it.productId}`} className="font-medium text-zinc-900 hover:underline">
+              <Link href={`/products/${it.productId}`} className="font-medium text-[var(--market-text)] hover:underline">
                 {it.product!.name}
               </Link>
-              {it.optionSummary && <span className="text-zinc-600"> ({it.optionSummary})</span>}{" "}
+              {it.optionSummary && <span className="text-[var(--market-text-muted)]"> ({it.optionSummary})</span>}{" "}
               {unitPrice.toLocaleString()}원 × {it.quantity} = {(unitPrice * it.quantity).toLocaleString()}원
             </p>
           );
         })}
       </div>
       <div className="card space-y-2">
-        <h2 className="text-sm font-semibold text-zinc-700">결제 금액 요약</h2>
-        <div className="flex justify-between text-sm text-zinc-600">
+        <h2 className="text-sm font-semibold text-[var(--market-text)]">결제 금액 요약</h2>
+        <div className="flex justify-between text-sm text-[var(--market-text-muted)]">
           <span>상품 금액</span>
           <span>{subtotal.toLocaleString()}원</span>
         </div>
-        <div className="flex justify-between text-sm text-zinc-600">
+        <div className="flex justify-between text-sm text-[var(--market-text-muted)]">
           <span>배송비</span>
           <span>
             {shippingFee === 0 && subtotal > 0 ? (
-              <span className="text-teal-700">무료</span>
+              <span className="text-[var(--market-secondary)]">무료</span>
             ) : (
               `${shippingFee.toLocaleString()}원`
             )}
           </span>
         </div>
         {subtotal > 0 && threshold > 0 && subtotal < threshold && (
-          <p className="text-xs text-zinc-500">
+          <p className="text-xs text-[var(--market-text-muted)]">
             {quote?.domestic === false ? "국제 배송: " : ""}
             {threshold.toLocaleString()}원 이상 구매 시 배송비 무료입니다.
           </p>
@@ -360,19 +360,19 @@ function CheckoutContent() {
             해외 배송 선택 시 결제는 토스가 아닌 별도 안내(또는 테스트 결제)로 진행될 수 있습니다.
           </p>
         )}
-        <div className="flex justify-between border-t border-zinc-200 pt-2 text-base font-semibold text-zinc-900">
+        <div className="flex justify-between border-t border-[var(--market-border)] pt-2 text-base font-semibold text-[var(--market-text)]">
           <span>총 결제 예정 금액</span>
           <span>{finalAmount.toLocaleString()}원</span>
         </div>
       </div>
       <form onSubmit={handleSubmit} className="card flex flex-col gap-4">
-        <h2 className="text-sm font-semibold text-zinc-700">결제 수단</h2>
-        <div className="rounded-lg border border-zinc-200 bg-zinc-50/50 p-3 text-sm text-zinc-600">
+        <h2 className="text-sm font-semibold text-[var(--market-text)]">결제 수단</h2>
+        <div className="rounded-lg border border-[var(--market-border)] bg-[var(--market-accent-subtle)] p-3 text-sm text-[var(--market-text-muted)]">
           <label className="flex items-center gap-2">
             <input type="radio" name="paymentMethod" defaultChecked className="h-4 w-4" />
             <span>주문 후 결제하기</span>
           </label>
-          <p className="mt-1 text-xs text-zinc-500">
+          <p className="mt-1 text-xs text-[var(--market-text-muted)]">
             주문 확정 후 주문 상세에서 결제합니다. PG 웹훅 연동 시 서버에서 자동 확정할 수 있습니다.
           </p>
         </div>
@@ -381,7 +381,7 @@ function CheckoutContent() {
             {error}
           </p>
         )}
-        <h2 className="text-sm font-semibold text-zinc-700">배송 정보</h2>
+        <h2 className="text-sm font-semibold text-[var(--market-text)]">배송 정보</h2>
         <label className="block">
           <span className="label">배송 국가</span>
           <select

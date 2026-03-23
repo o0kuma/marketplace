@@ -264,17 +264,17 @@ export default function ProductDetailPage() {
 
   return (
     <div>
-      <Link href="/products" className="text-sm font-medium text-teal-800 hover:underline">
+      <Link href="/products" className="text-sm font-medium text-[var(--market-accent)] hover:underline">
         ← Back to shop
       </Link>
       <div className="mt-8 grid gap-10 lg:grid-cols-2 lg:gap-14">
         <div className="relative">
-          <div className="sticky top-28 overflow-hidden rounded-3xl bg-stone-100 shadow-lg">
+          <div className="sticky top-28 overflow-hidden rounded-3xl bg-[var(--market-accent-subtle)] shadow-lg">
             <div className="relative aspect-square w-full sm:aspect-[4/5]">
               {mainImageUrl ? (
                 <Image src={mainImageUrl} alt={product.name} fill className="object-cover" sizes="(max-width: 1024px) 100vw, 50vw" unoptimized />
               ) : (
-                <div className="flex h-full w-full items-center justify-center text-stone-400">No image</div>
+                <div className="flex h-full w-full items-center justify-center text-[var(--market-text-muted)]">No image</div>
               )}
             </div>
             {galleryUrls.length > 1 && (
@@ -298,7 +298,7 @@ export default function ProductDetailPage() {
                   key={i}
                   type="button"
                   onClick={() => setSelectedImageIndex(i)}
-                  className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition ${i === selectedImageIndex ? "border-teal-600 ring-2 ring-teal-200" : "border-transparent hover:border-stone-300"}`}
+                  className={`relative h-16 w-16 shrink-0 overflow-hidden rounded-lg border-2 transition ${i === selectedImageIndex ? "border-[var(--market-accent)] ring-2 ring-[var(--market-accent-subtle)]" : "border-transparent hover:border-[var(--market-border)]"}`}
                 >
                   <Image src={url} alt="" fill className="object-cover" sizes="64px" unoptimized />
                 </button>
@@ -308,16 +308,16 @@ export default function ProductDetailPage() {
         </div>
         <div>
           <div className="flex items-start justify-between gap-4">
-            <h1 className="text-3xl font-semibold leading-tight tracking-tight text-stone-900 sm:text-4xl">{product.name}</h1>
+            <h1 className="text-3xl font-semibold leading-tight tracking-tight text-[var(--market-text)] sm:text-4xl">{product.name}</h1>
             <WishlistButton productId={product.id} initialInWishlist={inWishlist} onToggled={setInWishlist} variant="normal" />
           </div>
-          <p className="mt-4 text-3xl font-semibold text-stone-900">₩{displayPrice.toLocaleString()}</p>
-          <p className="mt-2 text-sm text-stone-500">Sold by <span className="font-medium text-stone-700">{product.sellerName}</span></p>
+          <p className="mt-4 text-3xl font-semibold text-[var(--market-text)]">₩{displayPrice.toLocaleString()}</p>
+          <p className="mt-2 text-sm text-[var(--market-text-muted)]">Sold by <span className="font-medium text-[var(--market-text)]">{product.sellerName}</span></p>
           {hasVariants && (
             <div className="mt-3 space-y-2">
               {groupsSorted.map((group, gi) => (
                 <div key={group.id}>
-                  <span className="text-sm font-medium text-stone-700">{group.name}</span>
+                  <span className="text-sm font-medium text-[var(--market-text)]">{group.name}</span>
                   <div className="mt-1 flex flex-wrap gap-2">
                     {(group.values ?? []).map((val) => (
                       <button
@@ -334,8 +334,8 @@ export default function ProductDetailPage() {
                         }
                         className={`rounded-full border px-3 py-1.5 text-sm transition ${
                           toNumericOptionId(selectedOptionValueIds[gi]) === toNumericOptionId(val.id)
-                            ? "border-teal-600 bg-teal-50 text-teal-800"
-                            : "border-stone-200 bg-white text-stone-700 hover:border-stone-300"
+                            ? "border-[var(--market-accent)] bg-[var(--market-accent-subtle)] text-[var(--market-accent)]"
+                            : "border-[var(--market-border)] bg-[var(--market-surface)] text-[var(--market-text)] hover:border-[var(--market-accent)]"
                         }`}
                       >
                         {val.name}
@@ -345,14 +345,14 @@ export default function ProductDetailPage() {
                 </div>
               ))}
               {selectedVariant && (
-                <p className="text-sm text-stone-600">
+                <p className="text-sm text-[var(--market-text-muted)]">
                   선택: <span className="font-medium">{selectedVariant.optionSummary ?? ""}</span>
                 </p>
               )}
             </div>
           )}
-          <p className="text-sm text-stone-500">{displayStock} in stock</p>
-          {product.description && <p className="mt-6 leading-relaxed text-stone-600">{product.description}</p>}
+          <p className="text-sm text-[var(--market-text-muted)]">{displayStock} in stock</p>
+          {product.description && <p className="mt-6 leading-relaxed text-[var(--market-text-muted)]">{product.description}</p>}
           {product.status !== "ON_SALE" && (
             <p className="mt-4 rounded-xl bg-amber-50 px-4 py-3 text-sm font-medium text-amber-800">
               {product.status === "SOLD_OUT" ? "Currently out of stock" : "No longer available"}
@@ -365,7 +365,7 @@ export default function ProductDetailPage() {
                 <p className="rounded-lg bg-amber-50 px-3 py-2 text-sm text-amber-800">옵션을 선택해 주세요.</p>
               )}
               <label className="flex items-center gap-4">
-                <span className="text-sm font-medium text-stone-700">Quantity</span>
+                <span className="text-sm font-medium text-[var(--market-text)]">Quantity</span>
                 <input
                   type="number"
                   min={1}
@@ -396,7 +396,7 @@ export default function ProductDetailPage() {
             </div>
           )}
           {user?.role === "SELLER" && user?.id === product.sellerId && (
-            <div className="mt-6 flex flex-wrap gap-3 border-t border-stone-200 pt-6">
+            <div className="mt-6 flex flex-wrap gap-3 border-t border-[var(--market-border)] pt-6">
               <Link href={`/seller/products/${product.id}/edit`} className="btn-secondary text-sm">
                 Edit listing
               </Link>

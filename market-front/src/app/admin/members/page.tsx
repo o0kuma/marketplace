@@ -141,25 +141,25 @@ export default function AdminMembersPage() {
         </div>
       ) : (
         <>
-          <div className="overflow-x-auto">
-            <table className="w-full border-collapse border border-zinc-200 text-sm">
+          <div className="admin-table-wrap">
+            <table className="admin-table">
               <thead>
-                <tr className="bg-zinc-50">
-                  <th className="border border-zinc-200 px-3 py-2 text-left">ID</th>
-                  <th className="border border-zinc-200 px-3 py-2 text-left">이름</th>
-                  <th className="border border-zinc-200 px-3 py-2 text-left">이메일</th>
-                  <th className="border border-zinc-200 px-3 py-2 text-left">역할</th>
-                  <th className="border border-zinc-200 px-3 py-2 text-left">상태</th>
-                  <th className="border border-zinc-200 px-3 py-2 text-left">작업</th>
+                <tr>
+                  <th className="text-left">ID</th>
+                  <th className="text-left">이름</th>
+                  <th className="text-left">이메일</th>
+                  <th className="text-left">역할</th>
+                  <th className="text-left">상태</th>
+                  <th className="text-left">작업</th>
                 </tr>
               </thead>
               <tbody>
                 {members.map((m) => (
-                  <tr key={m.id} className={m.deleted ? "bg-red-50/50" : ""}>
-                    <td className="border border-zinc-200 px-3 py-2">{m.id}</td>
-                    <td className="border border-zinc-200 px-3 py-2">{m.name}</td>
-                    <td className="border border-zinc-200 px-3 py-2">{m.email}</td>
-                    <td className="border border-zinc-200 px-3 py-2">
+                  <tr key={m.id} className={m.deleted ? "row-muted" : ""}>
+                    <td className="text-zinc-700">{m.id}</td>
+                    <td className="text-zinc-700">{m.name}</td>
+                    <td className="text-zinc-700">{m.email}</td>
+                    <td>
                       <select
                         value={m.role}
                         onChange={(e) => handleRoleChange(m.id, e.target.value)}
@@ -171,10 +171,10 @@ export default function AdminMembersPage() {
                         <option value="ADMIN">ADMIN</option>
                       </select>
                     </td>
-                    <td className="border border-zinc-200 px-3 py-2">
+                    <td>
                       {m.deleted ? <span className="text-red-600">탈퇴</span> : <span className="text-zinc-600">정상</span>}
                     </td>
-                    <td className="border border-zinc-200 px-3 py-2">
+                    <td>
                       {m.deleted && (
                         <button
                           type="button"

@@ -32,7 +32,7 @@ export default function AdminLayout({
   return (
     <>
       <AdminHeader />
-      <main id="main-content" className="market-container min-h-[calc(100vh-4rem)] bg-[var(--market-bg)] py-10" tabIndex={-1}>
+      <main id="main-content" className="market-container min-h-[calc(100vh-4rem)] py-10" tabIndex={-1}>
         {children}
       </main>
     </>

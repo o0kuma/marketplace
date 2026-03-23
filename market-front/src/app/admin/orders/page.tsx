@@ -108,28 +108,28 @@ export default function AdminOrdersPage() {
         <div className="empty-state"><p className="text-base">주문이 없습니다.</p></div>
       ) : (
         <>
-          <div className="overflow-auto rounded-xl border border-zinc-200 bg-white">
-            <table className="min-w-full text-sm">
-              <thead className="bg-zinc-50 text-zinc-600">
+          <div className="admin-table-wrap">
+            <table className="admin-table">
+              <thead>
                 <tr>
-                  <th className="px-3 py-2 text-left">주문번호</th>
-                  <th className="px-3 py-2 text-left">상태</th>
-                  <th className="px-3 py-2 text-right">총액</th>
-                  <th className="px-3 py-2 text-left">수령인</th>
-                  <th className="px-3 py-2 text-left">배송지</th>
-                  <th className="px-3 py-2 text-left">상세</th>
+                  <th className="text-left">주문번호</th>
+                  <th className="text-left">상태</th>
+                  <th className="text-right">총액</th>
+                  <th className="text-left">수령인</th>
+                  <th className="text-left">배송지</th>
+                  <th className="text-left">상세</th>
                 </tr>
               </thead>
               <tbody>
                 {orders.map((order) => (
-                  <tr key={order.id} className="border-t border-zinc-100">
+                  <tr key={order.id}>
                     <td className="px-3 py-2 font-medium text-zinc-900">#{order.id}</td>
                     <td className="px-3 py-2 text-zinc-700">{order.status}</td>
                     <td className="px-3 py-2 text-right text-zinc-700">{order.totalAmount.toLocaleString()}원</td>
                     <td className="px-3 py-2 text-zinc-700">{order.recipientName ?? "-"}</td>
                     <td className="px-3 py-2 text-zinc-700">{order.recipientAddress ?? "-"}</td>
                     <td className="px-3 py-2">
-                      <Link href={`/admin/orders/${order.id}`} className="text-slate-700 hover:underline">상세 보기</Link>
+                      <Link href={`/admin/orders/${order.id}`} className="text-sm text-zinc-700 hover:underline">상세 보기</Link>
                     </td>
                   </tr>
                 ))}
