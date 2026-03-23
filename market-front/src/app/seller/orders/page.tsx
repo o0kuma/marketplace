@@ -5,8 +5,21 @@ import { useAuth } from "@/context/AuthContext";
 import { api } from "@/lib/api";
 import type { Order, OrderListResponse, OrderStatus } from "@/types/order";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
+
+const VALID_STATUSES: OrderStatus[] = [
+  "ORDERED",
+  "PAYMENT_COMPLETE",
+  "SHIPPING",
+  "COMPLETE",
+  "CANCELLED",
+];
+
+function statusFromQueryParam(raw: string | null): OrderStatus | "" {
+  if (!raw) return "";
+  return VALID_STATUSES.includes(raw as OrderStatus) ? (raw as OrderStatus) : "";
+}
 
 const STATUS_OPTIONS: { value: OrderStatus | ""; label: string }[] = [
   { value: "", label: "전체" },
@@ -94,6 +107,8 @@ function SellerRefundButton({ order, onUpdated }: { order: Order; onUpdated: () 
 export default function SellerOrdersPage() {
   const { user } = useAuth();
   const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const [data, setData] = useState<OrderListResponse | null>(null);
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
@@ -102,6 +117,18 @@ export default function SellerOrdersPage() {
   const [size] = useState(20);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [urlFilterSynced, setUrlFilterSynced] = useState(false);
+
+  const replaceStatusInUrl = useCallback(
+    (next: OrderStatus | "") => {
+      const p = new URLSearchParams(searchParams.toString());
+      if (next) p.set("status", next);
+      else p.delete("status");
+      const q = p.toString();
+      router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
+    },
+    [pathname, router, searchParams],
+  );
 
   const fetchOrders = useCallback(async () => {
     if (!user) return;
@@ -121,6 +148,14 @@ export default function SellerOrdersPage() {
     }
   }, [user, page, size, statusFilter, dateFrom, dateTo]);
 
+  const statusQuery = searchParams.get("status");
+  useEffect(() => {
+    const s = statusFromQueryParam(statusQuery);
+    setStatusFilter(s);
+    setPage(0);
+    setUrlFilterSynced(true);
+  }, [statusQuery]);
+
   useEffect(() => {
     if (!user) {
       router.push("/login");
@@ -130,8 +165,9 @@ export default function SellerOrdersPage() {
       router.push("/");
       return;
     }
+    if (!urlFilterSynced) return;
     fetchOrders();
-  }, [user, router, fetchOrders]);
+  }, [user, router, fetchOrders, urlFilterSynced]);
 
   if (!user || user.role !== "SELLER") return null;
   if (loading && !data) return <LoadingSpinner />;
@@ -156,8 +192,10 @@ export default function SellerOrdersPage() {
           <select
             value={statusFilter}
             onChange={(e) => {
-              setStatusFilter(e.target.value as OrderStatus | "");
+              const v = e.target.value as OrderStatus | "";
+              setStatusFilter(v);
               setPage(0);
+              replaceStatusInUrl(v);
             }}
             className="input-field w-auto min-w-[120px]"
           >
@@ -192,7 +230,13 @@ export default function SellerOrdersPage() {
       )}
       {orders.length === 0 ? (
         <div className="empty-state">
-          <p className="text-base">판매 주문이 없습니다.</p>
+          <p className="text-base">
+            {statusFilter === "CANCELLED"
+              ? "취소된 주문이 없습니다."
+              : statusFilter
+                ? "해당 상태의 판매 주문이 없습니다."
+                : "판매 주문이 없습니다."}
+          </p>
           <Link href="/seller/products" className="btn-secondary mt-4 inline-flex">
             내 상품
           </Link>

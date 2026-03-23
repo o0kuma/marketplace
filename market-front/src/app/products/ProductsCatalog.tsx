@@ -44,7 +44,7 @@ export default function ProductsCatalog() {
       const res = await api<ProductListResponse>("/products", { params });
       setData(res);
     } catch (err) {
-      setError(err instanceof Error ? err.message : "Failed to load");
+      setError(err instanceof Error ? err.message : "목록을 불러오지 못했습니다.");
     } finally {
       setLoading(false);
     }
@@ -76,7 +76,7 @@ export default function ProductsCatalog() {
       <div className="empty-state">
         <p className="text-base text-red-600">{error}</p>
         <button type="button" onClick={() => fetchList()} className="btn-primary mt-4">
-          Retry
+          다시 시도
         </button>
       </div>
     );
@@ -88,9 +88,9 @@ export default function ProductsCatalog() {
   return (
     <div>
       <div className="mb-10">
-        <p className="section-eyebrow">Catalog</p>
-        <h1 className="section-title m-0">All products</h1>
-        <p className="mt-2 text-stone-500">Filter by category, price, and sort order.</p>
+        <p className="section-eyebrow">상품</p>
+        <h1 className="section-title m-0">전체 상품</h1>
+        <p className="mt-2 text-stone-500">카테고리·가격·정렬로 원하는 상품을 찾아 보세요.</p>
       </div>
       <div className="lg:grid lg:grid-cols-[minmax(220px,260px)_1fr] lg:gap-10 xl:gap-14">
         <aside className="mb-8 lg:mb-0">
@@ -103,17 +103,17 @@ export default function ProductsCatalog() {
             }}
           >
             <label className="flex flex-col">
-              <span className="label">Search</span>
+              <span className="label">검색</span>
               <input
                 type="search"
                 value={searchInput}
                 onChange={(e) => setSearchInput(e.target.value)}
-                placeholder="Product name"
+                placeholder="상품명"
                 className="input-field"
               />
             </label>
             <label className="flex flex-col">
-              <span className="label">Category</span>
+              <span className="label">카테고리</span>
               <select
                 value={categoryId}
                 onChange={(e) => {
@@ -122,7 +122,7 @@ export default function ProductsCatalog() {
                 }}
                 className="input-field w-auto min-w-[100px]"
               >
-                <option value="">All</option>
+                <option value="">전체</option>
                 {categories.map((c) => (
                   <option key={c.id} value={c.id}>
                     {c.name}
@@ -131,7 +131,7 @@ export default function ProductsCatalog() {
               </select>
             </label>
             <label className="flex flex-col">
-              <span className="label">Status</span>
+              <span className="label">판매 상태</span>
               <select
                 value={status}
                 onChange={(e) => {
@@ -140,13 +140,13 @@ export default function ProductsCatalog() {
                 }}
                 className="input-field w-auto min-w-[90px]"
               >
-                <option value="">All</option>
-                <option value="ON_SALE">In stock</option>
-                <option value="SOLD_OUT">Sold out</option>
+                <option value="">전체</option>
+                <option value="ON_SALE">판매중</option>
+                <option value="SOLD_OUT">품절</option>
               </select>
             </label>
             <label className="flex flex-col">
-              <span className="label">Min price</span>
+              <span className="label">최저 가격</span>
               <input
                 type="number"
                 min={0}
@@ -157,7 +157,7 @@ export default function ProductsCatalog() {
               />
             </label>
             <label className="flex flex-col">
-              <span className="label">Max price</span>
+              <span className="label">최고 가격</span>
               <input
                 type="number"
                 min={0}
@@ -168,7 +168,7 @@ export default function ProductsCatalog() {
               />
             </label>
             <label className="flex flex-col">
-              <span className="label">Sort</span>
+              <span className="label">정렬</span>
               <select
                 value={`${sortBy}-${direction}`}
                 onChange={(e) => {
@@ -179,14 +179,14 @@ export default function ProductsCatalog() {
                 }}
                 className="input-field w-auto min-w-[120px]"
               >
-                <option value="id-desc">Newest</option>
-                <option value="id-asc">Oldest</option>
-                <option value="price-asc">Price: low</option>
-                <option value="price-desc">Price: high</option>
+                <option value="id-desc">최신순</option>
+                <option value="id-asc">오래된순</option>
+                <option value="price-asc">가격 낮은순</option>
+                <option value="price-desc">가격 높은순</option>
               </select>
             </label>
             <label className="flex flex-col">
-              <span className="label">Per page</span>
+              <span className="label">페이지당 개수</span>
               <select
                 value={size}
                 onChange={(e) => {
@@ -201,7 +201,7 @@ export default function ProductsCatalog() {
               </select>
             </label>
             <button type="submit" className="btn-primary w-full">
-              Apply filters
+              필터 적용
             </button>
           </form>
         </aside>
@@ -225,7 +225,7 @@ export default function ProductsCatalog() {
                           unoptimized
                         />
                       ) : (
-                        <span className="flex h-full w-full items-center justify-center text-sm text-stone-400">No image</span>
+                        <span className="flex h-full w-full items-center justify-center text-sm text-stone-400">이미지 없음</span>
                       )}
                     </span>
                     <div className="p-4">
@@ -234,7 +234,7 @@ export default function ProductsCatalog() {
                       <p className="mt-1 text-xs text-stone-500">{p.sellerName}</p>
                       {p.status !== "ON_SALE" && (
                         <span className="mt-2 inline-block text-xs font-medium text-amber-700">
-                          {p.status === "SOLD_OUT" ? "Sold out" : "Unavailable"}
+                          {p.status === "SOLD_OUT" ? "품절" : "판매 불가"}
                         </span>
                       )}
                     </div>
@@ -244,13 +244,13 @@ export default function ProductsCatalog() {
             </ul>
           ) : (
             <div className="empty-state">
-              <p className="text-base font-medium text-stone-700">No products match your filters</p>
-              <p className="mt-1 text-sm">Try adjusting search or category.</p>
+              <p className="text-base font-medium text-stone-700">조건에 맞는 상품이 없습니다</p>
+              <p className="mt-1 text-sm">검색어나 카테고리를 바꿔 보세요.</p>
             </div>
           )}
           <div className="mt-10 flex flex-wrap items-center justify-center gap-2">
             <button type="button" disabled={data.first} onClick={() => setPage((x) => x - 1)} className="btn-secondary disabled:opacity-50">
-              Prev
+              이전
             </button>
             {Array.from({ length: Math.min(5, data.totalPages || 1) }, (_, i) => {
               const totalPages = data.totalPages || 1;
@@ -271,7 +271,7 @@ export default function ProductsCatalog() {
               );
             })}
             <button type="button" disabled={data.last} onClick={() => setPage((x) => x + 1)} className="btn-secondary disabled:opacity-50">
-              Next
+              다음
             </button>
             <span className="ml-2 text-sm text-stone-500">
               {data.page + 1} / {data.totalPages || 1}

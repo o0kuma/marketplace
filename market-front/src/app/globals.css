@@ -36,7 +36,9 @@ body {
   letter-spacing: -0.01em;
   overflow-x: hidden;
 }
-
+main:focus {
+  outline: none;
+}
 /* Layout width for storefront */
 .market-container {
   @apply mx-auto w-full max-w-7xl px-4 sm:px-6 lg:px-8;

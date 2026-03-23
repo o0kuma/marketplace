@@ -71,7 +71,7 @@ export default function Header() {
   return (
     <header id="site-header" className="sticky top-0 z-50 border-b border-stone-200/80 bg-white/90 shadow-sm backdrop-blur-md">
       <div className="border-b border-teal-900/5 bg-gradient-to-r from-teal-950 via-teal-900 to-stone-900 px-4 py-2 text-center text-xs font-medium tracking-wide text-white/95 sm:text-sm">
-        Free standard delivery on eligible orders · New sellers welcome · Shop the collection
+        일정 금액 이상 무료 배송 · 판매자 모집 · 다양한 상품을 만나 보세요
       </div>
       <div className="market-container flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
         <div className="flex items-center justify-between gap-6 lg:justify-start">
@@ -87,32 +87,32 @@ export default function Header() {
                 type="search"
                 value={searchQ}
                 onChange={(e) => setSearchQ(e.target.value)}
-                placeholder="Search products..."
+                placeholder="상품명 검색"
                 className="min-w-0 flex-1 border-0 bg-transparent px-4 py-2.5 text-sm text-stone-800 placeholder:text-stone-400 focus:outline-none focus:ring-0"
-                aria-label="Search products"
+                aria-label="상품 검색"
               />
               <button
                 type="submit"
                 className="shrink-0 bg-teal-800 px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-teal-700"
               >
-                Search
+                검색
               </button>
             </div>
           </form>
         </div>
         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:gap-x-7 lg:justify-end">
           <Link href="/products" className={navClass(pathname, "/products")}>
-            Shop
+            쇼핑
           </Link>
           <Link href="/notices" className={navClass(pathname, "/notices")}>
-            News
+            공지
           </Link>
           {loading ? (
             <span className="text-sm text-stone-400">…</span>
           ) : user ? (
             <>
               <Link href="/cart" className={`relative ${navClass(pathname, "/cart")}`}>
-                Cart
+                장바구니
                 {cartCount > 0 && (
                   <span className="absolute -right-2 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-teal-700 px-1 text-[10px] font-bold text-white">
                     {cartCount > 99 ? "99+" : cartCount}
@@ -120,26 +120,26 @@ export default function Header() {
                 )}
               </Link>
               <Link href="/notifications" className={`relative ${navClass(pathname, "/notifications")}`}>
-                Alerts
+                알림
                 {notificationCount > 0 && (
                   <span className="absolute -right-2 -top-1 h-2 w-2 rounded-full bg-amber-500 ring-2 ring-white" />
                 )}
               </Link>
               <Link href="/orders" className={navClass(pathname, "/orders")}>
-                Orders
+                주문
               </Link>
               <UserMenu profileImageUrl={user.profileImageUrl} />
             </>
           ) : (
             <>
               <Link href="/login" className={navClass(pathname, "/login")}>
-                Sign in
+                로그인
               </Link>
               <Link
                 href="/signup"
                 className="rounded-full bg-stone-900 px-4 py-2 text-sm font-semibold text-white hover:bg-stone-800"
               >
-                Join
+                회원가입
               </Link>
             </>
           )}
@@ -154,11 +154,11 @@ export default function Header() {
             type="search"
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
-            placeholder="Search..."
+            placeholder="상품명 검색"
             className="min-w-0 flex-1 border-0 bg-transparent px-4 py-2 text-sm focus:outline-none"
           />
           <button type="submit" className="bg-teal-800 px-4 py-2 text-sm font-medium text-white">
-            Go
+            검색
           </button>
         </div>
       </form>

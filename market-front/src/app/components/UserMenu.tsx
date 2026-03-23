@@ -17,11 +17,11 @@ function initialsFromName(name: string): string {
 function roleLabel(role: MemberRole): string {
   switch (role) {
     case "SELLER":
-      return "Seller";
+      return "판매자";
     case "ADMIN":
-      return "Admin";
+      return "관리자";
     default:
-      return "Member";
+      return "회원";
   }
 }
 
@@ -96,7 +96,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
           <div className="border-b border-stone-100 px-4 py-3">
             <p className="truncate text-sm font-semibold text-stone-900">{user.name}</p>
             <p className="mt-0.5 truncate text-xs text-stone-500">{user.email}</p>
-            <span className="mt-2 inline-block rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-medium uppercase tracking-wide text-stone-600">
+            <span className="mt-2 inline-block rounded-full bg-stone-100 px-2.5 py-0.5 text-[11px] font-medium tracking-wide text-stone-600">
               {roleLabel(user.role)}
             </span>
           </div>
@@ -108,7 +108,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
               onClick={close}
               className="block px-4 py-2.5 text-sm font-medium text-stone-700 hover:bg-stone-50"
             >
-              Profile &amp; account
+              프로필 · 계정
             </Link>
             {user.role === "SELLER" && (
               <Link
@@ -119,7 +119,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
                   sellerActive ? "text-teal-800" : "text-stone-700"
                 }`}
               >
-                Seller hub
+                판매자 센터
               </Link>
             )}
             {user.role === "ADMIN" && (
@@ -131,7 +131,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
                   adminActive ? "text-teal-800" : "text-stone-700"
                 }`}
               >
-                Admin console
+                관리자 콘솔
               </Link>
             )}
           </div>
@@ -146,7 +146,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
               }}
               className="w-full px-4 py-2.5 text-left text-sm font-medium text-stone-500 hover:bg-stone-50 hover:text-stone-800"
             >
-              Log out
+              로그아웃
             </button>
           </div>
         </div>

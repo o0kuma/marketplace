@@ -33,6 +33,10 @@ export default function MypagePage() {
   const [wishlist, setWishlist] = useState<PageResponse<WishlistItem> | null>(null);
   const [myReviews, setMyReviews] = useState<PageResponse<MyReviewItem> | null>(null);
   const [myQuestions, setMyQuestions] = useState<PageResponse<MyQuestionItem> | null>(null);
+  const [editingReviewId, setEditingReviewId] = useState<number | null>(null);
+  const [editReviewRating, setEditReviewRating] = useState(5);
+  const [editReviewContent, setEditReviewContent] = useState("");
+  const [reviewSaving, setReviewSaving] = useState(false);
 
   const fetchMe = useCallback(async () => {
     try {
@@ -172,6 +176,49 @@ export default function MypagePage() {
     }
   }
 
+  function startEditReview(r: MyReviewItem) {
+    setEditingReviewId(r.id);
+    setEditReviewRating(r.rating);
+    setEditReviewContent(r.content ?? "");
+    setError("");
+  }
+
+  function cancelEditReview() {
+    setEditingReviewId(null);
+  }
+
+  async function saveEditReview(reviewId: number) {
+    setReviewSaving(true);
+    setError("");
+    try {
+      await api(`/reviews/${reviewId}`, {
+        method: "PATCH",
+        body: JSON.stringify({
+          rating: editReviewRating,
+          content: editReviewContent.trim() || null,
+        }),
+      });
+      setEditingReviewId(null);
+      await fetchMyReviews();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "리뷰 수정에 실패했습니다.");
+    } finally {
+      setReviewSaving(false);
+    }
+  }
+
+  async function deleteReview(reviewId: number) {
+    if (!confirm("이 리뷰를 삭제하시겠습니까?")) return;
+    setError("");
+    try {
+      await api(`/reviews/${reviewId}`, { method: "DELETE" });
+      if (editingReviewId === reviewId) setEditingReviewId(null);
+      await fetchMyReviews();
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "리뷰 삭제에 실패했습니다.");
+    }
+  }
+
   async function handleWithdraw() {
     if (withdrawConfirm !== "탈퇴합니다") return;
     setWithdrawing(true);
@@ -294,11 +341,75 @@ export default function MypagePage() {
           <ul className="space-y-3">
             {myReviews.content.map((r) => (
               <li key={r.id} className="rounded-lg border border-zinc-100 p-3">
-                <Link href={`/products/${r.productId}`} className="font-medium text-zinc-900 hover:underline">
-                  {r.productName}
-                </Link>
-                <p className="mt-1 text-sm text-zinc-600">★ {r.rating} · {r.content || "(내용 없음)"}</p>
-                <p className="mt-1 text-xs text-zinc-400">{new Date(r.createdAt).toLocaleDateString("ko-KR")}</p>
+                <div className="flex flex-wrap items-start justify-between gap-2">
+                  <Link href={`/products/${r.productId}`} className="font-medium text-zinc-900 hover:underline">
+                    {r.productName}
+                  </Link>
+                  {editingReviewId !== r.id && (
+                    <div className="flex shrink-0 gap-2">
+                      <button
+                        type="button"
+                        onClick={() => startEditReview(r)}
+                        className="text-sm font-medium text-teal-800 hover:underline"
+                      >
+                        수정
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => void deleteReview(r.id)}
+                        className="text-sm font-medium text-zinc-500 hover:text-red-600"
+                      >
+                        삭제
+                      </button>
+                    </div>
+                  )}
+                </div>
+                {editingReviewId === r.id ? (
+                  <div className="mt-3 space-y-3">
+                    <label className="block">
+                      <span className="label">별점</span>
+                      <select
+                        value={editReviewRating}
+                        onChange={(e) => setEditReviewRating(Number(e.target.value))}
+                        className="input-field w-auto min-w-[100px]"
+                      >
+                        {[5, 4, 3, 2, 1].map((n) => (
+                          <option key={n} value={n}>
+                            {n}점
+                          </option>
+                        ))}
+                      </select>
+                    </label>
+                    <label className="block">
+                      <span className="label">내용</span>
+                      <textarea
+                        value={editReviewContent}
+                        onChange={(e) => setEditReviewContent(e.target.value)}
+                        rows={3}
+                        className="input-field resize-y"
+                        placeholder="리뷰 내용 (선택)"
+                      />
+                    </label>
+                    <div className="flex flex-wrap gap-2">
+                      <button
+                        type="button"
+                        disabled={reviewSaving}
+                        onClick={() => void saveEditReview(r.id)}
+                        className="btn-primary disabled:opacity-50"
+                      >
+                        {reviewSaving ? "저장 중…" : "저장"}
+                      </button>
+                      <button type="button" onClick={cancelEditReview} className="btn-secondary">
+                        취소
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  <>
+                    <p className="mt-1 text-sm text-zinc-600">★ {r.rating} · {r.content || "(내용 없음)"}</p>
+                    <p className="mt-1 text-xs text-zinc-400">{new Date(r.createdAt).toLocaleDateString("ko-KR")}</p>
+                  </>
+                )}
               </li>
             ))}
           </ul>
