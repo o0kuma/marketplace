@@ -16,10 +16,12 @@ public class ShippingController {
     private final ShippingQuoteService shippingQuoteService;
 
     @GetMapping("/quote")
-    public ShippingQuoteResponse quote(@RequestParam int subtotalKrw) {
+    public ShippingQuoteResponse quote(
+            @RequestParam int subtotalKrw,
+            @RequestParam(name = "country", required = false, defaultValue = "KR") String country) {
         if (subtotalKrw < 0) {
             subtotalKrw = 0;
         }
-        return shippingQuoteService.quote(subtotalKrw);
+        return shippingQuoteService.quote(subtotalKrw, country);
     }
 }

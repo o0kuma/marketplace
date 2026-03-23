@@ -79,8 +79,8 @@ function IssueDistribution({
 }) {
   const rows = [
     { key: "cancelled", label: "취소 주문", value: cancelledCount, color: "bg-rose-500", href: "/seller/orders?status=CANCELLED" },
-    { key: "returns", label: "반품/교환 요청 대기", value: returnRequestedCount, color: "bg-violet-500", href: "/seller/orders" },
-    { key: "shipment", label: "출고 대기(운송장 미입력)", value: pendingShipmentCount, color: "bg-amber-500", href: "/seller/orders" },
+    { key: "returns", label: "반품/교환 요청 대기", value: returnRequestedCount, color: "bg-violet-500", href: "/seller/orders?queue=RETURN_REQUESTED" },
+    { key: "shipment", label: "출고 대기(운송장 미입력)", value: pendingShipmentCount, color: "bg-amber-500", href: "/seller/orders?queue=PENDING_SHIPMENT" },
   ];
   const total = rows.reduce((acc, row) => acc + row.value, 0);
   return (
@@ -185,7 +185,7 @@ export default function SellerDashboardPage() {
               <span className="mt-2 text-sm text-amber-700">주문 관리 →</span>
             </Link>
             <Link
-              href="/seller/orders"
+              href="/seller/orders?queue=PENDING"
               className="card flex flex-col border-amber-200 bg-amber-50/50 transition hover:shadow-md"
             >
               <span className="text-sm font-medium text-zinc-500">미처리 주문</span>
@@ -209,7 +209,7 @@ export default function SellerDashboardPage() {
               <span className="mt-1 text-xl font-bold text-zinc-900">{stats.monthOrderCount}</span>
               <span className="mt-1 text-sm text-zinc-600">이번 달 매출 {Number(stats.monthSales).toLocaleString()}원</span>
             </div>
-            <Link href="/seller/orders" className="card flex flex-col bg-zinc-50/80 transition hover:shadow-md">
+            <Link href="/seller/orders?queue=PENDING_SHIPMENT" className="card flex flex-col bg-zinc-50/80 transition hover:shadow-md">
               <span className="text-sm font-medium text-zinc-500">출고 대기 (운송장 미입력)</span>
               <span className="mt-1 text-xl font-bold text-amber-800">{stats.pendingShipmentCount}</span>
               <span className="mt-1 text-sm text-amber-700">주문 처리로 이동 →</span>
@@ -221,7 +221,7 @@ export default function SellerDashboardPage() {
               <span className="mt-1 text-2xl font-bold text-zinc-900">{stats.cancelledOrderCount}</span>
               <span className="mt-2 text-sm text-amber-700">취소 건 확인 →</span>
             </Link>
-            <Link href="/seller/orders" className="card flex flex-col transition hover:shadow-md">
+            <Link href="/seller/orders?queue=RETURN_REQUESTED" className="card flex flex-col transition hover:shadow-md">
               <span className="text-sm font-medium text-zinc-500">반품/교환 요청 대기</span>
               <span className="mt-1 text-2xl font-bold text-zinc-900">{stats.returnRequestedCount}</span>
               <span className="mt-2 text-sm text-amber-700">주문 상세에서 처리 →</span>

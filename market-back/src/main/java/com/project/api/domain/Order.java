@@ -43,6 +43,10 @@ public class Order extends BaseTimeEntity {
     @Column(nullable = false, length = 500)
     private String recipientAddress;
 
+    /** ISO 3166-1 alpha-2 shipping country */
+    @Column(name = "recipient_country", length = 2)
+    private String recipientCountry;
+
     @Column(length = 100)
     private String trackingNumber;
 
@@ -51,7 +55,7 @@ public class Order extends BaseTimeEntity {
 
     @Builder
     public Order(Member buyer, OrderStatus status, Integer totalAmount, Integer shippingFee,
-                 String recipientName, String recipientPhone, String recipientAddress) {
+                 String recipientName, String recipientPhone, String recipientAddress, String recipientCountry) {
         this.buyer = buyer;
         this.status = status != null ? status : OrderStatus.ORDERED;
         this.totalAmount = totalAmount != null ? totalAmount : 0;
@@ -59,6 +63,14 @@ public class Order extends BaseTimeEntity {
         this.recipientName = recipientName;
         this.recipientPhone = recipientPhone;
         this.recipientAddress = recipientAddress;
+        this.recipientCountry = recipientCountry;
+    }
+
+    public String recipientCountryOrDefault() {
+        if (recipientCountry == null || recipientCountry.isBlank()) {
+            return "KR";
+        }
+        return recipientCountry.trim().toUpperCase();
     }
 
     public void addItem(OrderItem item) {
@@ -77,8 +89,17 @@ public class Order extends BaseTimeEntity {
         this.trackingNumber = trackingNumber;
     }
 
+    /** Non-null, non-blank tracking number after trim (for API flags and status checks). */
+    public boolean hasTrackingNumber() {
+        return trackingNumber != null && !trackingNumber.trim().isEmpty();
+    }
+
     public void setShippingFee(int shippingFee) {
         this.shippingFee = shippingFee;
+    }
+
+    public void setRecipientCountry(String recipientCountry) {
+        this.recipientCountry = recipientCountry;
     }
 
     public boolean hasItemFromSeller(Long sellerId) {

@@ -141,14 +141,18 @@ public class CartService {
     }
 
     public CheckoutPreviewResponse previewCheckout(Long memberId, CartCheckoutPreviewRequest request) {
+        String cc = ShippingCountry.normalize(request.getCountry());
         Cart cart = cartRepository.findByMemberId(memberId).orElse(null);
         if (cart == null || cart.getItems().isEmpty()) {
+            var q0 = shippingQuoteService.quote(0, cc);
             return CheckoutPreviewResponse.builder()
                     .lines(List.of())
+                    .countryCode(q0.getCountryCode())
+                    .domestic(q0.isDomestic())
                     .subtotalKrw(0)
                     .shippingFeeKrw(0)
                     .totalKrw(0)
-                    .freeShippingThresholdKrw(shippingQuoteService.quote(0).getFreeShippingThresholdKrw())
+                    .freeShippingThresholdKrw(q0.getFreeShippingThresholdKrw())
                     .build();
         }
         List<Long> wanted = request.getCartItemIds() != null ? request.getCartItemIds() : List.of();
@@ -191,9 +195,11 @@ public class CartService {
                     .lineTotal(line)
                     .build());
         }
-        var q = shippingQuoteService.quote(subtotal);
+        var q = shippingQuoteService.quote(subtotal, cc);
         return CheckoutPreviewResponse.builder()
                 .lines(previewLines)
+                .countryCode(q.getCountryCode())
+                .domestic(q.isDomestic())
                 .subtotalKrw(subtotal)
                 .shippingFeeKrw(q.getShippingFeeKrw())
                 .totalKrw(q.getTotalKrw())

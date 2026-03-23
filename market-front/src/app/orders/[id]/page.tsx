@@ -20,23 +20,48 @@ const statusLabel: Record<string, string> = {
   CANCELLED: "취소",
 };
 
-function sellerNextOptions(status: OrderStatus): { value: OrderStatus; label: string }[] {
-  if (status === "PAYMENT_COMPLETE") return [{ value: "SHIPPING", label: "배송중으로" }];
-  if (status === "SHIPPING") return [{ value: "COMPLETE", label: "배송완료" }];
+function orderHasTracking(order: Order): boolean {
+  if (order.trackingEntered === true) return true;
+  if (order.trackingEntered === false) return false;
+  return !!(order.trackingNumber && order.trackingNumber.trim());
+}
+
+function sellerNextOptions(order: Order): { value: OrderStatus; label: string }[] {
+  const status = order.status;
+  const tracked = orderHasTracking(order);
+  if (status === "PAYMENT_COMPLETE") {
+    if (!tracked) return [];
+    return [{ value: "SHIPPING", label: "배송중으로" }];
+  }
+  if (status === "SHIPPING") {
+    if (!tracked) return [];
+    return [{ value: "COMPLETE", label: "배송완료" }];
+  }
   return [];
 }
 
-function SellerStatusSelect({ order, onUpdated }: { order: Order; onUpdated: () => void }) {
+function SellerStatusSelect({
+  order,
+  onUpdated,
+  onError,
+}: {
+  order: Order;
+  onUpdated: () => void;
+  onError: (message: string) => void;
+}) {
   const [loading, setLoading] = useState(false);
-  const nextOpts = sellerNextOptions(order.status);
+  const nextOpts = sellerNextOptions(order);
   async function applyStatus(status: OrderStatus) {
     setLoading(true);
+    onError("");
     try {
       await api(`/orders/${order.id}/status`, {
         method: "PATCH",
         body: JSON.stringify({ status }),
       });
       onUpdated();
+    } catch (err) {
+      onError(err instanceof Error ? err.message : "상태 변경 실패");
     } finally {
       setLoading(false);
     }
@@ -45,6 +70,20 @@ function SellerStatusSelect({ order, onUpdated }: { order: Order; onUpdated: () 
     return (
       <p className="text-sm text-amber-800 bg-amber-50 rounded-lg px-3 py-2">
         구매자 결제 완료 후 배송 처리를 시작할 수 있습니다.
+      </p>
+    );
+  }
+  if (order.status === "PAYMENT_COMPLETE" && !orderHasTracking(order)) {
+    return (
+      <p className="text-sm text-amber-800 bg-amber-50 rounded-lg px-3 py-2">
+        운송장 번호를 저장한 뒤 &quot;배송중&quot;으로 변경할 수 있습니다.
+      </p>
+    );
+  }
+  if (order.status === "SHIPPING" && !orderHasTracking(order)) {
+    return (
+      <p className="text-sm text-amber-800 bg-amber-50 rounded-lg px-3 py-2">
+        운송장 번호를 입력·저장한 뒤 배송완료 처리할 수 있습니다.
       </p>
     );
   }
@@ -157,7 +196,8 @@ export default function OrderDetailPage() {
   async function handlePay() {
     if (!order || order.status !== "ORDERED") return;
     setError("");
-    const useToss = paymentConfig?.useToss && paymentConfig?.clientKey;
+    const international = order.domesticShipping === false;
+    const useToss = !international && paymentConfig?.useToss && paymentConfig?.clientKey;
     try {
       if (useToss) {
         const tossPayments = await loadTossPayments(paymentConfig!.clientKey!);
@@ -351,6 +391,9 @@ export default function OrderDetailPage() {
           <p className="mt-1 text-zinc-600">{order.recipientName ?? "-"}</p>
           <p className="text-sm text-zinc-600">{order.recipientPhone ?? "-"}</p>
           <p className="text-sm text-zinc-600">{order.recipientAddress ?? "-"}</p>
+          {order.recipientCountry && order.recipientCountry !== "KR" && (
+            <p className="text-sm text-zinc-600">배송 국가: {order.recipientCountry}</p>
+          )}
           {isSellerView && (
             <div className="mt-3 flex flex-wrap items-center gap-2">
               <span className="text-sm font-medium text-zinc-700">운송장 번호</span>
@@ -478,7 +521,7 @@ export default function OrderDetailPage() {
           {isSellerView ? (
             <>
               {order.status !== "CANCELLED" && order.status !== "COMPLETE" && (
-                <SellerStatusSelect order={order} onUpdated={fetchOrder} />
+                <SellerStatusSelect order={order} onUpdated={fetchOrder} onError={setError} />
               )}
               {(order.status === "PAYMENT_COMPLETE" || order.status === "SHIPPING") && (
                 <button
@@ -497,8 +540,13 @@ export default function OrderDetailPage() {
             <>
               {order.status === "ORDERED" && (
                 <>
+                  {order.domesticShipping === false && paymentConfig?.useToss && (
+                    <p className="w-full text-sm text-amber-800">
+                      해외 배송 주문은 토스 결제를 사용할 수 없습니다. 아래 버튼으로 테스트 결제(스텁)만 가능합니다.
+                    </p>
+                  )}
                   <button type="button" onClick={handlePay} className="btn-primary">
-                    결제하기
+                    {order.domesticShipping === false && paymentConfig?.useToss ? "테스트 결제로 완료" : "결제하기"}
                   </button>
                   <button type="button" onClick={handleCancel} className="btn-secondary border-red-200 text-red-600 hover:bg-red-50">
                     주문 취소

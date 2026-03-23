@@ -1,5 +1,6 @@
 package com.project.api.service;
 
+import com.project.api.config.MarketShippingProperties;
 import com.project.api.domain.*;
 import com.project.api.repository.OrderRepository;
 import com.project.api.repository.PaymentRepository;
@@ -10,6 +11,7 @@ import com.project.api.web.NotFoundException;
 import com.project.api.web.dto.OrderRequest;
 import com.project.api.web.dto.OrderResponse;
 import com.project.api.web.dto.OrderStatusRequest;
+import com.project.api.web.dto.SellerOrderQueue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -21,6 +23,11 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional(readOnly = true)
 public class OrderService {
 
+    private static final java.util.List<OrderStatus> SELLER_PENDING_EXCLUDED =
+            java.util.List.of(OrderStatus.COMPLETE, OrderStatus.CANCELLED);
+    private static final java.util.List<OrderStatus> PENDING_SHIPMENT_STATUSES =
+            java.util.List.of(OrderStatus.PAYMENT_COMPLETE, OrderStatus.SHIPPING);
+
     private final OrderRepository orderRepository;
     private final ProductRepository productRepository;
     private final ProductVariantRepository productVariantRepository;
@@ -29,10 +36,12 @@ public class OrderService {
     private final NotificationService notificationService;
     private final ShippingQuoteService shippingQuoteService;
     private final EmailService emailService;
+    private final MarketShippingProperties marketShippingProperties;
 
     @Transactional
     public OrderResponse create(Long buyerId, OrderRequest request) {
         Member buyer = memberService.findById(buyerId);
+        String shipCountry = ShippingCountry.normalize(request.getRecipientCountry());
         Order order = Order.builder()
                 .buyer(buyer)
                 .status(OrderStatus.ORDERED)
@@ -41,6 +50,7 @@ public class OrderService {
                 .recipientName(request.getRecipientName())
                 .recipientPhone(request.getRecipientPhone())
                 .recipientAddress(request.getRecipientAddress())
+                .recipientCountry(shipCountry)
                 .build();
         int total = 0;
         java.util.Set<Long> productsWithVariantsToUpdate = new java.util.HashSet<>();
@@ -85,7 +95,7 @@ public class OrderService {
             order.addItem(item);
             total += orderPrice * qty;
         }
-        int shipping = shippingQuoteService.feeForSubtotal(total);
+        int shipping = shippingQuoteService.feeForSubtotal(total, shipCountry);
         order.setShippingFee(shipping);
         order.setTotalAmount(total + shipping);
         Order saved = orderRepository.save(order);
@@ -162,8 +172,14 @@ public class OrderService {
             if (newStatus == OrderStatus.SHIPPING && order.getStatus() != OrderStatus.PAYMENT_COMPLETE) {
                 throw new IllegalArgumentException("Set shipping only after payment is complete");
             }
+            if (newStatus == OrderStatus.SHIPPING && !order.hasTrackingNumber()) {
+                throw new IllegalArgumentException("Enter tracking number before marking as shipping");
+            }
             if (newStatus == OrderStatus.COMPLETE && order.getStatus() != OrderStatus.SHIPPING) {
                 throw new IllegalArgumentException("Complete only after shipping");
+            }
+            if (newStatus == OrderStatus.COMPLETE && !order.hasTrackingNumber()) {
+                throw new IllegalArgumentException("Enter tracking number before completing delivery");
             }
         }
         order.setStatus(newStatus);
@@ -193,6 +209,31 @@ public class OrderService {
         return orderRepository.findBySellerIdAndStatusAndCreatedAtBetween(sellerId, status, from, to, pageable).map(this::toOrderResponse);
     }
 
+    /** Dashboard presets: pending (not complete/cancelled), pending shipment, open return requests. */
+    public Page<OrderResponse> getSellerOrdersByQueue(Long sellerId, SellerOrderQueue queue, Pageable pageable) {
+        Page<Order> page = switch (queue) {
+            case PENDING -> orderRepository.findBySellerIdAndStatusNotIn(sellerId, SELLER_PENDING_EXCLUDED, pageable);
+            case PENDING_SHIPMENT -> orderRepository.findBySellerIdAndStatusInAndTrackingEmpty(
+                    sellerId, PENDING_SHIPMENT_STATUSES, pageable);
+            case RETURN_REQUESTED -> orderRepository.findBySellerIdHavingReturnRequestStatus(
+                    sellerId, ReturnRequestStatus.REQUESTED, pageable);
+        };
+        return page.map(this::toOrderResponse);
+    }
+
+    public Page<OrderResponse> getSellerOrdersByQueue(
+            Long sellerId, SellerOrderQueue queue, java.time.LocalDateTime from, java.time.LocalDateTime to, Pageable pageable) {
+        Page<Order> page = switch (queue) {
+            case PENDING -> orderRepository.findBySellerIdAndStatusNotInAndCreatedAtBetween(
+                    sellerId, SELLER_PENDING_EXCLUDED, from, to, pageable);
+            case PENDING_SHIPMENT -> orderRepository.findBySellerIdAndStatusInAndTrackingEmptyAndCreatedAtBetween(
+                    sellerId, PENDING_SHIPMENT_STATUSES, from, to, pageable);
+            case RETURN_REQUESTED -> orderRepository.findBySellerIdHavingReturnRequestStatusAndCreatedAtBetween(
+                    sellerId, ReturnRequestStatus.REQUESTED, from, to, pageable);
+        };
+        return page.map(this::toOrderResponse);
+    }
+
     @Transactional
     public OrderResponse updateTrackingNumber(Long orderId, Long memberId, String trackingNumber) {
         Order order = orderRepository.findById(orderId)
@@ -206,6 +247,8 @@ public class OrderService {
 
     private OrderResponse toOrderResponse(Order order) {
         boolean refunded = paymentRepository.existsByOrderIdAndStatus(order.getId(), PaymentStatus.REFUNDED);
-        return OrderResponse.from(order, refunded);
+        boolean domestic = ShippingCountry.isDomestic(
+                order.recipientCountryOrDefault(), marketShippingProperties.getDomesticCountry());
+        return OrderResponse.from(order, refunded, domestic);
     }
 }

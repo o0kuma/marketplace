@@ -14,6 +14,8 @@ import java.util.List;
 public class CheckoutPreviewResponse {
 
     private List<CheckoutPreviewLineResponse> lines;
+    private String countryCode;
+    private boolean domestic;
     private int subtotalKrw;
     private int shippingFeeKrw;
     private int totalKrw;

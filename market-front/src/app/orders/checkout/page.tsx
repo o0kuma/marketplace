@@ -21,11 +21,22 @@ interface OrderItemInput {
 }
 
 interface ShippingQuote {
+  countryCode?: string;
+  domestic?: boolean;
   subtotalKrw: number;
   shippingFeeKrw: number;
   totalKrw: number;
   freeShippingThresholdKrw: number;
 }
+
+const SHIPPING_COUNTRY_OPTIONS: { code: string; label: string }[] = [
+  { code: "KR", label: "대한민국" },
+  { code: "US", label: "United States" },
+  { code: "JP", label: "日本" },
+  { code: "CN", label: "中国" },
+  { code: "GB", label: "United Kingdom" },
+  { code: "DE", label: "Deutschland" },
+];
 
 interface CheckoutPreviewLine {
   cartItemId: number;
@@ -77,20 +88,29 @@ function CheckoutContent() {
   const [error, setError] = useState("");
   const [submitting, setSubmitting] = useState("");
   const [quote, setQuote] = useState<ShippingQuote | null>(null);
+  const [shippingCountry, setShippingCountry] = useState("KR");
 
-  const refreshQuote = useCallback(async (subtotal: number) => {
-    try {
-      const q = await api<ShippingQuote>("/shipping/quote", { params: { subtotalKrw: String(subtotal) } });
-      setQuote(q);
-    } catch {
-      setQuote({
-        subtotalKrw: subtotal,
-        shippingFeeKrw: 0,
-        totalKrw: subtotal,
-        freeShippingThresholdKrw: 50000,
-      });
-    }
-  }, []);
+  const refreshQuote = useCallback(
+    async (subtotal: number, country: string) => {
+      const cc = country.trim().toUpperCase().slice(0, 2) || "KR";
+      try {
+        const q = await api<ShippingQuote>("/shipping/quote", {
+          params: { subtotalKrw: String(subtotal), country: cc },
+        });
+        setQuote(q);
+      } catch {
+        setQuote({
+          countryCode: cc,
+          domestic: cc === "KR",
+          subtotalKrw: subtotal,
+          shippingFeeKrw: 0,
+          totalKrw: subtotal,
+          freeShippingThresholdKrw: 50000,
+        });
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     if (!user) {
@@ -111,19 +131,26 @@ function CheckoutContent() {
         try {
           const preview = await api<{
             lines: CheckoutPreviewLine[];
+            countryCode?: string;
+            domestic?: boolean;
             subtotalKrw: number;
             shippingFeeKrw: number;
             totalKrw: number;
             freeShippingThresholdKrw: number;
           }>("/cart/checkout-preview", {
             method: "POST",
-            body: JSON.stringify({ cartItemIds: cartItemIds.length ? cartItemIds : [] }),
+            body: JSON.stringify({
+              cartItemIds: cartItemIds.length ? cartItemIds : [],
+              country: shippingCountry.trim().toUpperCase().slice(0, 2) || "KR",
+            }),
           });
           if (cancelled) return;
           if (!preview.lines.length) {
             setItems([]);
             setLoading(false);
             setQuote({
+              countryCode: preview.countryCode,
+              domestic: preview.domestic,
               subtotalKrw: 0,
               shippingFeeKrw: 0,
               totalKrw: 0,
@@ -146,6 +173,8 @@ function CheckoutContent() {
           }));
           setItems(mapped);
           setQuote({
+            countryCode: preview.countryCode,
+            domestic: preview.domestic,
             subtotalKrw: preview.subtotalKrw,
             shippingFeeKrw: preview.shippingFeeKrw,
             totalKrw: preview.totalKrw,
@@ -186,7 +215,7 @@ function CheckoutContent() {
           (s, it) => s + (it.displayPrice != null ? it.displayPrice * it.quantity : it.product ? it.product.price * it.quantity : 0),
           0
         );
-        refreshQuote(sub);
+        refreshQuote(sub, shippingCountry);
       }).catch(() => {
         if (!cancelled) setError("상품을 불러올 수 없습니다.");
       }).finally(() => {
@@ -198,7 +227,7 @@ function CheckoutContent() {
     return () => {
       cancelled = true;
     };
-  }, [user, fromCart, searchParams.toString(), refreshQuote]);
+  }, [user, fromCart, searchParams.toString(), shippingCountry, refreshQuote]);
 
   useEffect(() => {
     if (fromCart || !items.length) return;
@@ -206,8 +235,8 @@ function CheckoutContent() {
       (s, it) => s + (it.displayPrice != null ? it.displayPrice * it.quantity : it.product ? it.product.price * it.quantity : 0),
       0
     );
-    refreshQuote(sub);
-  }, [items, fromCart, refreshQuote]);
+    refreshQuote(sub, shippingCountry);
+  }, [items, fromCart, refreshQuote, shippingCountry]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -231,6 +260,7 @@ function CheckoutContent() {
           recipientName: recipientName.trim(),
           recipientPhone: recipientPhone.trim(),
           recipientAddress: recipientAddress.trim(),
+          recipientCountry: shippingCountry.trim().toUpperCase().slice(0, 2) || "KR",
         }),
       });
       const idsToRemove = validItems.map((it) => it.cartItemId).filter((id): id is number => id != null);
@@ -319,9 +349,15 @@ function CheckoutContent() {
             )}
           </span>
         </div>
-        {subtotal > 0 && subtotal < threshold && (
+        {subtotal > 0 && threshold > 0 && subtotal < threshold && (
           <p className="text-xs text-zinc-500">
+            {quote?.domestic === false ? "국제 배송: " : ""}
             {threshold.toLocaleString()}원 이상 구매 시 배송비 무료입니다.
+          </p>
+        )}
+        {quote?.domestic === false && (
+          <p className="text-xs text-amber-800/90">
+            해외 배송 선택 시 결제는 토스가 아닌 별도 안내(또는 테스트 결제)로 진행될 수 있습니다.
           </p>
         )}
         <div className="flex justify-between border-t border-zinc-200 pt-2 text-base font-semibold text-zinc-900">
@@ -346,6 +382,20 @@ function CheckoutContent() {
           </p>
         )}
         <h2 className="text-sm font-semibold text-zinc-700">배송 정보</h2>
+        <label className="block">
+          <span className="label">배송 국가</span>
+          <select
+            value={shippingCountry}
+            onChange={(e) => setShippingCountry(e.target.value)}
+            className="input-field"
+          >
+            {SHIPPING_COUNTRY_OPTIONS.map((o) => (
+              <option key={o.code} value={o.code}>
+                {o.label} ({o.code})
+              </option>
+            ))}
+          </select>
+        </label>
         <label className="block">
           <span className="label">수령인</span>
           <input

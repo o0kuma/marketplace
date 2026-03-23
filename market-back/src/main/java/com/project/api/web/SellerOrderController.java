@@ -4,6 +4,7 @@ import com.project.api.domain.OrderStatus;
 import com.project.api.service.OrderService;
 import com.project.api.web.dto.OrderResponse;
 import com.project.api.web.dto.PageResponse;
+import com.project.api.web.dto.SellerOrderQueue;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -31,6 +32,7 @@ public class SellerOrderController {
             @AuthenticationPrincipal User user,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
+            @RequestParam(required = false) SellerOrderQueue queue,
             @RequestParam(required = false) OrderStatus status,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate from,
             @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate to) {
@@ -38,6 +40,12 @@ public class SellerOrderController {
         Pageable pageable = PageRequest.of(page, size);
         LocalDateTime fromDt = from != null ? from.atStartOfDay() : null;
         LocalDateTime toDt = to != null ? to.atTime(LocalTime.MAX).plusNanos(1) : null;
+        if (queue != null) {
+            if (fromDt != null && toDt != null) {
+                return PageResponse.of(orderService.getSellerOrdersByQueue(sellerId, queue, fromDt, toDt, pageable));
+            }
+            return PageResponse.of(orderService.getSellerOrdersByQueue(sellerId, queue, pageable));
+        }
         if (fromDt != null && toDt != null) {
             if (status != null) {
                 return PageResponse.of(orderService.getSellerOrders(sellerId, status, fromDt, toDt, pageable));

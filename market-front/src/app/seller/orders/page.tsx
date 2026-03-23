@@ -21,6 +21,15 @@ function statusFromQueryParam(raw: string | null): OrderStatus | "" {
   return VALID_STATUSES.includes(raw as OrderStatus) ? (raw as OrderStatus) : "";
 }
 
+type SellerOrderQueue = "PENDING" | "PENDING_SHIPMENT" | "RETURN_REQUESTED";
+
+const VALID_QUEUES: SellerOrderQueue[] = ["PENDING", "PENDING_SHIPMENT", "RETURN_REQUESTED"];
+
+function queueFromQueryParam(raw: string | null): SellerOrderQueue | "" {
+  if (!raw) return "";
+  return VALID_QUEUES.includes(raw as SellerOrderQueue) ? (raw as SellerOrderQueue) : "";
+}
+
 const STATUS_OPTIONS: { value: OrderStatus | ""; label: string }[] = [
   { value: "", label: "전체" },
   { value: "ORDERED", label: "주문됨" },
@@ -30,11 +39,62 @@ const STATUS_OPTIONS: { value: OrderStatus | ""; label: string }[] = [
   { value: "CANCELLED", label: "취소" },
 ];
 
+const QUICK_QUEUE_OPTIONS: { value: SellerOrderQueue; label: string }[] = [
+  { value: "PENDING", label: "미처리 주문" },
+  { value: "PENDING_SHIPMENT", label: "출고 대기 (운송장 미입력)" },
+  { value: "RETURN_REQUESTED", label: "반품·교환 요청 대기" },
+];
+
+function filterSelectValue(queueFilter: SellerOrderQueue | "", statusFilter: OrderStatus | ""): string {
+  if (queueFilter) return `q:${queueFilter}`;
+  if (statusFilter) return `s:${statusFilter}`;
+  return "";
+}
+
+function emptyListMessage(queueFilter: SellerOrderQueue | "", statusFilter: OrderStatus | ""): string {
+  if (queueFilter === "PENDING") return "미처리 주문이 없습니다.";
+  if (queueFilter === "PENDING_SHIPMENT") return "출고 대기(운송장 미입력) 주문이 없습니다.";
+  if (queueFilter === "RETURN_REQUESTED") return "반품·교환 요청 대기 주문이 없습니다.";
+  if (statusFilter === "CANCELLED") return "취소된 주문이 없습니다.";
+  if (statusFilter) return "해당 상태의 판매 주문이 없습니다.";
+  return "판매 주문이 없습니다.";
+}
+
+function orderHasTracking(order: Order): boolean {
+  if (order.trackingEntered === true) return true;
+  if (order.trackingEntered === false) return false;
+  return !!(order.trackingNumber && order.trackingNumber.trim());
+}
+
+/** Whether UI should treat this order as missing tracking (API flag or fallback). */
+function needsTrackingHighlight(order: Order): boolean {
+  if (order.needsTrackingInput === true) return true;
+  if (order.needsTrackingInput === false) return false;
+  return (
+    (order.status === "PAYMENT_COMPLETE" || order.status === "SHIPPING") && !orderHasTracking(order)
+  );
+}
+
+function sellerStatusOptionAllowed(order: Order, target: OrderStatus): boolean {
+  if (target === "COMPLETE" && order.status !== "SHIPPING") {
+    return false;
+  }
+  if (target === "SHIPPING" && order.status === "PAYMENT_COMPLETE" && !orderHasTracking(order)) {
+    return false;
+  }
+  if (target === "COMPLETE" && order.status === "SHIPPING" && !orderHasTracking(order)) {
+    return false;
+  }
+  return true;
+}
+
 function OrderStatusSelect({ order, onUpdated }: { order: Order; onUpdated: () => void }) {
   const [loading, setLoading] = useState(false);
+  const [localError, setLocalError] = useState("");
   async function change(e: React.ChangeEvent<HTMLSelectElement>) {
     const status = e.target.value as OrderStatus;
     if (status === order.status) return;
+    setLocalError("");
     setLoading(true);
     try {
       await api(`/orders/${order.id}/status`, {
@@ -42,24 +102,34 @@ function OrderStatusSelect({ order, onUpdated }: { order: Order; onUpdated: () =
         body: JSON.stringify({ status }),
       });
       onUpdated();
+    } catch (err) {
+      setLocalError(err instanceof Error ? err.message : "상태 변경 실패");
     } finally {
       setLoading(false);
     }
   }
   if (order.status === "CANCELLED") return <span className="text-zinc-500">취소됨</span>;
   return (
-    <select
-      value={order.status}
-      onChange={change}
-      disabled={loading}
-      className="input-field w-auto min-w-[120px] disabled:opacity-50"
-    >
-      {STATUS_OPTIONS.filter((o) => o.value && o.value !== "CANCELLED").map((opt) => (
-        <option key={opt.value} value={opt.value}>
-          {opt.label}
-        </option>
-      ))}
-    </select>
+    <div className="min-w-0">
+      <select
+        value={order.status}
+        onChange={change}
+        disabled={loading}
+        className="input-field w-auto min-w-[120px] disabled:opacity-50"
+      >
+        {STATUS_OPTIONS.filter((o) => o.value && o.value !== "CANCELLED")
+          .filter(
+            (opt) =>
+              opt.value === order.status || sellerStatusOptionAllowed(order, opt.value as OrderStatus),
+          )
+          .map((opt) => (
+            <option key={opt.value} value={opt.value}>
+              {opt.label}
+            </option>
+          ))}
+      </select>
+      {localError && <p className="mt-1 max-w-xs text-xs text-red-600">{localError}</p>}
+    </div>
   );
 }
 
@@ -112,6 +182,7 @@ export default function SellerOrdersPage() {
   const [data, setData] = useState<OrderListResponse | null>(null);
   const [page, setPage] = useState(0);
   const [statusFilter, setStatusFilter] = useState<OrderStatus | "">("");
+  const [queueFilter, setQueueFilter] = useState<SellerOrderQueue | "">("");
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
   const [size] = useState(20);
@@ -119,11 +190,13 @@ export default function SellerOrdersPage() {
   const [error, setError] = useState("");
   const [urlFilterSynced, setUrlFilterSynced] = useState(false);
 
-  const replaceStatusInUrl = useCallback(
-    (next: OrderStatus | "") => {
+  const replaceListFiltersInUrl = useCallback(
+    (next: { queue: SellerOrderQueue | ""; status: OrderStatus | "" }) => {
       const p = new URLSearchParams(searchParams.toString());
-      if (next) p.set("status", next);
-      else p.delete("status");
+      p.delete("queue");
+      p.delete("status");
+      if (next.queue) p.set("queue", next.queue);
+      if (next.status) p.set("status", next.status);
       const q = p.toString();
       router.replace(q ? `${pathname}?${q}` : pathname, { scroll: false });
     },
@@ -136,7 +209,8 @@ export default function SellerOrdersPage() {
     setError("");
     try {
       const params: Record<string, string> = { page: String(page), size: String(size) };
-      if (statusFilter) params.status = statusFilter;
+      if (queueFilter) params.queue = queueFilter;
+      else if (statusFilter) params.status = statusFilter;
       if (dateFrom) params.from = dateFrom;
       if (dateTo) params.to = dateTo;
       const res = await api<OrderListResponse>("/seller/orders", { params });
@@ -146,15 +220,22 @@ export default function SellerOrdersPage() {
     } finally {
       setLoading(false);
     }
-  }, [user, page, size, statusFilter, dateFrom, dateTo]);
+  }, [user, page, size, queueFilter, statusFilter, dateFrom, dateTo]);
 
   const statusQuery = searchParams.get("status");
+  const queueQuery = searchParams.get("queue");
   useEffect(() => {
-    const s = statusFromQueryParam(statusQuery);
-    setStatusFilter(s);
+    const q = queueFromQueryParam(queueQuery);
+    if (q) {
+      setQueueFilter(q);
+      setStatusFilter("");
+    } else {
+      setQueueFilter("");
+      setStatusFilter(statusFromQueryParam(statusQuery));
+    }
     setPage(0);
     setUrlFilterSynced(true);
-  }, [statusQuery]);
+  }, [queueQuery, statusQuery]);
 
   useEffect(() => {
     if (!user) {
@@ -187,23 +268,46 @@ export default function SellerOrdersPage() {
         </Link>
       </div>
       <div className="mb-4 flex flex-wrap items-center gap-4">
-        <label className="flex items-center gap-2">
-          <span className="label">상태</span>
+        <label className="flex min-w-0 max-w-full flex-col gap-1 sm:flex-row sm:items-center sm:gap-2">
+          <span className="label shrink-0">보기</span>
           <select
-            value={statusFilter}
+            value={filterSelectValue(queueFilter, statusFilter)}
             onChange={(e) => {
-              const v = e.target.value as OrderStatus | "";
-              setStatusFilter(v);
+              const v = e.target.value;
               setPage(0);
-              replaceStatusInUrl(v);
+              if (v === "") {
+                setQueueFilter("");
+                setStatusFilter("");
+                replaceListFiltersInUrl({ queue: "", status: "" });
+              } else if (v.startsWith("q:")) {
+                const q = v.slice(2) as SellerOrderQueue;
+                setQueueFilter(q);
+                setStatusFilter("");
+                replaceListFiltersInUrl({ queue: q, status: "" });
+              } else if (v.startsWith("s:")) {
+                const s = v.slice(2) as OrderStatus;
+                setQueueFilter("");
+                setStatusFilter(s);
+                replaceListFiltersInUrl({ queue: "", status: s });
+              }
             }}
-            className="input-field w-auto min-w-[120px]"
+            className="input-field w-full min-w-[200px] max-w-md sm:w-auto"
           >
-            {STATUS_OPTIONS.map((opt) => (
-              <option key={opt.value || "all"} value={opt.value}>
-                {opt.label}
-              </option>
-            ))}
+            <option value="">전체</option>
+            <optgroup label="빠른 보기 (대시보드)">
+              {QUICK_QUEUE_OPTIONS.map((opt) => (
+                <option key={opt.value} value={`q:${opt.value}`}>
+                  {opt.label}
+                </option>
+              ))}
+            </optgroup>
+            <optgroup label="주문 상태">
+              {STATUS_OPTIONS.filter((o) => o.value).map((opt) => (
+                <option key={opt.value} value={`s:${opt.value}`}>
+                  {opt.label}
+                </option>
+              ))}
+            </optgroup>
           </select>
         </label>
         <label className="flex items-center gap-2">
@@ -230,13 +334,7 @@ export default function SellerOrdersPage() {
       )}
       {orders.length === 0 ? (
         <div className="empty-state">
-          <p className="text-base">
-            {statusFilter === "CANCELLED"
-              ? "취소된 주문이 없습니다."
-              : statusFilter
-                ? "해당 상태의 판매 주문이 없습니다."
-                : "판매 주문이 없습니다."}
-          </p>
+          <p className="text-base">{emptyListMessage(queueFilter, statusFilter)}</p>
           <Link href="/seller/products" className="btn-secondary mt-4 inline-flex">
             내 상품
           </Link>
@@ -263,12 +361,17 @@ export default function SellerOrdersPage() {
                     {order.recipientName} / {order.recipientPhone} / {order.recipientAddress}
                   </p>
                 )}
-                {order.trackingNumber ? (
+                {orderHasTracking(order) ? (
                   <p className="mt-2 text-sm font-medium text-zinc-700">
                     운송장: <span className="font-mono">{order.trackingNumber}</span>
                   </p>
                 ) : (
-                  <p className="mt-2 text-sm text-amber-700">운송장 미입력</p>
+                  <p className="mt-2 text-sm text-amber-700">
+                    운송장 미입력
+                    {needsTrackingHighlight(order) && (
+                      <span className="ml-1 text-xs">· 주문 상세에서 번호 저장 후 상태 변경</span>
+                    )}
+                  </p>
                 )}
                 <ul className="mt-2 list-inside list-disc text-sm text-zinc-600">
                   {order.items.map((item, i) => (

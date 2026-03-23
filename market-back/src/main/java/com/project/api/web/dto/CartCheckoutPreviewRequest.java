@@ -14,4 +14,7 @@ public class CartCheckoutPreviewRequest {
 
     /** Cart line ids to include; empty = all items in cart */
     private List<Long> cartItemIds = new ArrayList<>();
+
+    /** ISO 3166-1 alpha-2 shipping country for quote */
+    private String country;
 }

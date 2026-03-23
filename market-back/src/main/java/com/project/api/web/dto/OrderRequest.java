@@ -30,4 +30,8 @@ public class OrderRequest {
     @NotBlank
     @Size(max = 500)
     private String recipientAddress;
+
+    /** ISO 3166-1 alpha-2; omitted or invalid → domestic default (KR) */
+    @Size(min = 2, max = 2)
+    private String recipientCountry;
 }

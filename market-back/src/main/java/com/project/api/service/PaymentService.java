@@ -1,5 +1,6 @@
 package com.project.api.service;
 
+import com.project.api.config.MarketShippingProperties;
 import com.project.api.domain.Order;
 import com.project.api.domain.OrderStatus;
 import com.project.api.domain.Payment;
@@ -31,6 +32,7 @@ public class PaymentService {
     private final NotificationService notificationService;
     private final TossPaymentService tossPaymentService;
     private final EmailService emailService;
+    private final MarketShippingProperties marketShippingProperties;
 
     @Value("${app.payment.webhook-secret:}")
     private String webhookSecret;
@@ -41,12 +43,14 @@ public class PaymentService {
                           PaymentRepository paymentRepository,
                           NotificationService notificationService,
                           TossPaymentService tossPaymentService,
-                          EmailService emailService) {
+                          EmailService emailService,
+                          MarketShippingProperties marketShippingProperties) {
         this.orderRepository = orderRepository;
         this.paymentRepository = paymentRepository;
         this.notificationService = notificationService;
         this.tossPaymentService = tossPaymentService;
         this.emailService = emailService;
+        this.marketShippingProperties = marketShippingProperties;
     }
 
     /** Toss orderId used when opening payment (must be 6–64 chars, alphanumeric, -, _). */
@@ -82,6 +86,10 @@ public class PaymentService {
         }
         if (!tossPaymentService.isConfigured()) {
             throw new IllegalStateException("Toss Payments is not configured");
+        }
+        if (!ShippingCountry.isDomestic(order.recipientCountryOrDefault(), marketShippingProperties.getDomesticCountry())) {
+            throw new IllegalArgumentException(
+                    "Card payment (Toss) is only available for domestic shipping addresses");
         }
         String pgTransactionId;
         try {
@@ -215,6 +223,9 @@ public class PaymentService {
         }
         if (paymentRepository.findByOrderIdAndStatus(orderId, PaymentStatus.COMPLETED).isPresent()) {
             return;
+        }
+        if (!ShippingCountry.isDomestic(order.recipientCountryOrDefault(), marketShippingProperties.getDomesticCountry())) {
+            throw new IllegalArgumentException("Webhook payment is only accepted for domestic orders");
         }
         Payment payment = Payment.builder()
                 .order(order)

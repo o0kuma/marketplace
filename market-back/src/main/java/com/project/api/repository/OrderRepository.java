@@ -2,6 +2,7 @@ package com.project.api.repository;
 
 import com.project.api.domain.Order;
 import com.project.api.domain.OrderStatus;
+import com.project.api.domain.ReturnRequestStatus;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -80,4 +81,83 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
 
     @Query("select distinct o from Order o join o.items i where i.product.seller.id = :sellerId and o.status = :status and o.createdAt >= :from and o.createdAt < :to order by o.createdAt desc")
     Page<Order> findBySellerIdAndStatusAndCreatedAtBetween(@Param("sellerId") Long sellerId, @Param("status") OrderStatus status, @Param("from") LocalDateTime from, @Param("to") LocalDateTime to, Pageable pageable);
+
+    @Query("""
+            select distinct o from Order o join o.items i
+            where i.product.seller.id = :sellerId
+              and o.status not in :excluded
+            order by o.createdAt desc
+            """)
+    Page<Order> findBySellerIdAndStatusNotIn(
+            @Param("sellerId") Long sellerId,
+            @Param("excluded") List<OrderStatus> excluded,
+            Pageable pageable);
+
+    @Query("""
+            select distinct o from Order o join o.items i
+            where i.product.seller.id = :sellerId
+              and o.status not in :excluded
+              and o.createdAt >= :from and o.createdAt < :to
+            order by o.createdAt desc
+            """)
+    Page<Order> findBySellerIdAndStatusNotInAndCreatedAtBetween(
+            @Param("sellerId") Long sellerId,
+            @Param("excluded") List<OrderStatus> excluded,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable);
+
+    @Query("""
+            select distinct o from Order o join o.items i
+            where i.product.seller.id = :sellerId
+              and o.status in :statuses
+              and (o.trackingNumber is null or trim(o.trackingNumber) = '')
+            order by o.createdAt desc
+            """)
+    Page<Order> findBySellerIdAndStatusInAndTrackingEmpty(
+            @Param("sellerId") Long sellerId,
+            @Param("statuses") List<OrderStatus> statuses,
+            Pageable pageable);
+
+    @Query("""
+            select distinct o from Order o join o.items i
+            where i.product.seller.id = :sellerId
+              and o.status in :statuses
+              and (o.trackingNumber is null or trim(o.trackingNumber) = '')
+              and o.createdAt >= :from and o.createdAt < :to
+            order by o.createdAt desc
+            """)
+    Page<Order> findBySellerIdAndStatusInAndTrackingEmptyAndCreatedAtBetween(
+            @Param("sellerId") Long sellerId,
+            @Param("statuses") List<OrderStatus> statuses,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable);
+
+    @Query("""
+            select distinct o from Order o
+            join o.items i
+            where i.product.seller.id = :sellerId
+              and exists (select 1 from ReturnRequest rr where rr.order = o and rr.status = :rrStatus)
+            order by o.createdAt desc
+            """)
+    Page<Order> findBySellerIdHavingReturnRequestStatus(
+            @Param("sellerId") Long sellerId,
+            @Param("rrStatus") ReturnRequestStatus rrStatus,
+            Pageable pageable);
+
+    @Query("""
+            select distinct o from Order o
+            join o.items i
+            where i.product.seller.id = :sellerId
+              and exists (select 1 from ReturnRequest rr where rr.order = o and rr.status = :rrStatus)
+              and o.createdAt >= :from and o.createdAt < :to
+            order by o.createdAt desc
+            """)
+    Page<Order> findBySellerIdHavingReturnRequestStatusAndCreatedAtBetween(
+            @Param("sellerId") Long sellerId,
+            @Param("rrStatus") ReturnRequestStatus rrStatus,
+            @Param("from") LocalDateTime from,
+            @Param("to") LocalDateTime to,
+            Pageable pageable);
 }
