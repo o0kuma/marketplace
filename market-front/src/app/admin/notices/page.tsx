@@ -17,6 +17,8 @@ interface NoticeItem {
 export default function AdminNoticesPage() {
   const [data, setData] = useState<PageResponse<NoticeItem> | null>(null);
   const [page, setPage] = useState(0);
+  const [keyword, setKeyword] = useState("");
+  const [pinnedFilter, setPinnedFilter] = useState<"" | "true" | "false">("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -24,8 +26,11 @@ export default function AdminNoticesPage() {
     setLoading(true);
     setError("");
     try {
+      const params: Record<string, string> = { page: String(page), size: "20" };
+      if (keyword.trim()) params.keyword = keyword.trim();
+      if (pinnedFilter) params.pinned = pinnedFilter;
       const res = await api<PageResponse<NoticeItem>>("/admin/notices", {
-        params: { page: String(page), size: "20" },
+        params,
       });
       setData(res);
     } catch (e) {
@@ -33,7 +38,7 @@ export default function AdminNoticesPage() {
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, keyword, pinnedFilter]);
 
   useEffect(() => {
     load();
@@ -59,20 +64,47 @@ export default function AdminNoticesPage() {
           새 공지 작성
         </Link>
       </div>
+      <div className="mb-4 flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={keyword}
+          onChange={(e) => {
+            setKeyword(e.target.value);
+            setPage(0);
+          }}
+          placeholder="제목 검색"
+          className="input-field w-60"
+        />
+        <select
+          value={pinnedFilter}
+          onChange={(e) => {
+            setPinnedFilter(e.target.value as "" | "true" | "false");
+            setPage(0);
+          }}
+          className="input-field w-auto"
+        >
+          <option value="">전체</option>
+          <option value="true">고정만</option>
+          <option value="false">일반만</option>
+        </select>
+      </div>
       {error && <p className="mb-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
       <div className="overflow-x-auto rounded-xl border border-zinc-200">
         <table className="w-full border-collapse text-sm">
           <thead className="bg-zinc-50">
             <tr>
+              <th className="border-b border-zinc-200 px-3 py-2 text-left">ID</th>
               <th className="border-b border-zinc-200 px-3 py-2 text-left">제목</th>
               <th className="border-b border-zinc-200 px-3 py-2 text-left">고정</th>
               <th className="border-b border-zinc-200 px-3 py-2 text-left">등록일</th>
+              <th className="border-b border-zinc-200 px-3 py-2 text-left">수정일</th>
               <th className="border-b border-zinc-200 px-3 py-2 text-left">작업</th>
             </tr>
           </thead>
           <tbody>
             {(data?.content ?? []).map((n) => (
               <tr key={n.id} className="border-b border-zinc-100">
+                <td className="px-3 py-2 text-zinc-700">{n.id}</td>
                 <td className="px-3 py-2">
                   <Link href={`/notices/${n.id}`} className="text-zinc-600 hover:underline" target="_blank">
                     미리보기
@@ -81,6 +113,7 @@ export default function AdminNoticesPage() {
                 </td>
                 <td className="px-3 py-2">{n.pinned ? "예" : "-"}</td>
                 <td className="px-3 py-2 text-zinc-600">{new Date(n.createdAt).toLocaleString("ko-KR")}</td>
+                <td className="px-3 py-2 text-zinc-600">{new Date(n.updatedAt).toLocaleString("ko-KR")}</td>
                 <td className="px-3 py-2">
                   <Link href={`/admin/notices/${n.id}/edit`} className="text-sm text-slate-700 hover:underline">
                     수정
@@ -91,6 +124,13 @@ export default function AdminNoticesPage() {
                 </td>
               </tr>
             ))}
+            {(data?.content ?? []).length === 0 && (
+              <tr>
+                <td colSpan={6} className="px-3 py-8 text-center text-zinc-500">
+                  조회된 공지가 없습니다.
+                </td>
+              </tr>
+            )}
           </tbody>
         </table>
       </div>

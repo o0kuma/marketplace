@@ -1,5 +1,6 @@
 package com.project.api.web;
 
+import com.project.api.domain.MemberRole;
 import com.project.api.service.MemberService;
 import com.project.api.web.dto.MemberResponse;
 import com.project.api.web.dto.PageResponse;
@@ -22,9 +23,10 @@ public class AdminMemberController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size,
             @RequestParam(required = false) String keyword,
-            @RequestParam(defaultValue = "false") boolean includeDeleted) {
+            @RequestParam(defaultValue = "false") boolean includeDeleted,
+            @RequestParam(required = false) MemberRole role) {
         Pageable pageable = PageRequest.of(page, size);
-        return PageResponse.of(memberService.listForAdmin(keyword, includeDeleted, pageable));
+        return PageResponse.of(memberService.listForAdmin(keyword, includeDeleted, role, pageable));
     }
 
     @PatchMapping("/{id}/role")

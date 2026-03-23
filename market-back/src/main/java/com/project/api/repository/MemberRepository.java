@@ -25,8 +25,15 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
 
     long countByCreatedAtBetween(LocalDateTime from, LocalDateTime to);
 
-    @Query("select m from Member m where (:includeDeleted = true or m.deletedAt is null) and (:kw is null or :kw = '' or lower(m.email) like lower(concat('%', :kw, '%')) or lower(m.name) like lower(concat('%', :kw, '%'))) order by m.createdAt desc")
-    Page<Member> findAdminMembers(@Param("kw") String keyword, @Param("includeDeleted") boolean includeDeleted, Pageable pageable);
+    @Query("select m from Member m where (:includeDeleted = true or m.deletedAt is null) "
+            + "and (:kw is null or :kw = '' or lower(m.email) like lower(concat('%', :kw, '%')) "
+            + "or lower(m.name) like lower(concat('%', :kw, '%'))) "
+            + "and (:role is null or m.role = :role) order by m.createdAt desc")
+    Page<Member> findAdminMembers(
+            @Param("kw") String keyword,
+            @Param("includeDeleted") boolean includeDeleted,
+            @Param("role") MemberRole role,
+            Pageable pageable);
 
     Page<Member> findAllByOrderByCreatedAtDesc(Pageable pageable);
 }

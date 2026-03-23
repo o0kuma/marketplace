@@ -13,6 +13,8 @@ interface NoticeDetail {
   pinned: boolean;
   createdAt: string;
   updatedAt: string;
+  prevNotice?: { id: number; title: string } | null;
+  nextNotice?: { id: number; title: string } | null;
 }
 
 export default function NoticeDetailPage() {
@@ -73,6 +75,28 @@ export default function NoticeDetailPage() {
         className="prose prose-zinc mt-6 max-w-none text-zinc-800 [&_ul]:list-inside [&_ul]:list-disc [&_ul]:space-y-2"
         dangerouslySetInnerHTML={{ __html: notice.content }}
       />
+      <nav className="mt-10 rounded-xl border border-zinc-200 bg-white">
+        <div className="flex items-center border-b border-zinc-100 px-4 py-3 text-sm">
+          <span className="w-16 shrink-0 text-zinc-500">이전글</span>
+          {notice.prevNotice ? (
+            <Link href={`/notices/${notice.prevNotice.id}`} className="truncate text-zinc-900 hover:underline">
+              {notice.prevNotice.title}
+            </Link>
+          ) : (
+            <span className="text-zinc-400">이전 공지가 없습니다.</span>
+          )}
+        </div>
+        <div className="flex items-center px-4 py-3 text-sm">
+          <span className="w-16 shrink-0 text-zinc-500">다음글</span>
+          {notice.nextNotice ? (
+            <Link href={`/notices/${notice.nextNotice.id}`} className="truncate text-zinc-900 hover:underline">
+              {notice.nextNotice.title}
+            </Link>
+          ) : (
+            <span className="text-zinc-400">다음 공지가 없습니다.</span>
+          )}
+        </div>
+      </nav>
     </article>
   );
 }

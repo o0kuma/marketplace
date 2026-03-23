@@ -17,8 +17,11 @@ public class NoticeController {
     private final NoticeService noticeService;
 
     @GetMapping
-    public PageResponse<NoticeListItemResponse> list(@PageableDefault(size = 20) Pageable pageable) {
-        return PageResponse.of(noticeService.listPublic(pageable));
+    public PageResponse<NoticeListItemResponse> list(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean pinned,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return PageResponse.of(noticeService.listPublic(keyword, pinned, pageable));
     }
 
     @GetMapping("/{id}")

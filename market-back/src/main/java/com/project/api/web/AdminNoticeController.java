@@ -20,8 +20,11 @@ public class AdminNoticeController {
     private final NoticeService noticeService;
 
     @GetMapping
-    public PageResponse<NoticeListItemResponse> list(@PageableDefault(size = 20) Pageable pageable) {
-        return PageResponse.of(noticeService.listAdmin(pageable));
+    public PageResponse<NoticeListItemResponse> list(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean pinned,
+            @PageableDefault(size = 20) Pageable pageable) {
+        return PageResponse.of(noticeService.listAdmin(keyword, pinned, pageable));
     }
 
     @GetMapping("/{id}")

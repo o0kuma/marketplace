@@ -1,6 +1,7 @@
 package com.project.api.web;
 
 import com.project.api.service.CategoryService;
+import com.project.api.web.dto.AdminCategoryListItemResponse;
 import com.project.api.web.dto.CategoryRequest;
 import com.project.api.web.dto.CategoryResponse;
 import jakarta.validation.Valid;
@@ -18,8 +19,10 @@ public class AdminCategoryController {
     private final CategoryService categoryService;
 
     @GetMapping
-    public List<CategoryResponse> list() {
-        return categoryService.list();
+    public List<AdminCategoryListItemResponse> list(
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Boolean hasProducts) {
+        return categoryService.listForAdmin(keyword, hasProducts);
     }
 
     @PostMapping

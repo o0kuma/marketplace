@@ -125,10 +125,11 @@ public class MemberService {
         member.clearPasswordResetToken();
     }
 
-    /** Admin: list members with optional keyword, include deleted. */
-    public Page<MemberResponse> listForAdmin(String keyword, boolean includeDeleted, Pageable pageable) {
+    /** Admin: list members with optional keyword, include deleted, optional role filter. */
+    public Page<MemberResponse> listForAdmin(
+            String keyword, boolean includeDeleted, MemberRole role, Pageable pageable) {
         String kw = (keyword != null && !keyword.isBlank()) ? keyword.trim() : "";
-        Page<Member> page = memberRepository.findAdminMembers(kw, includeDeleted, pageable);
+        Page<Member> page = memberRepository.findAdminMembers(kw, includeDeleted, role, pageable);
         return page.map(MemberResponse::from);
     }
 

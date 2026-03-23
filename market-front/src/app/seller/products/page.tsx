@@ -174,8 +174,9 @@ export default function SellerProductsPage() {
         p.categoryName ?? "",
       ])
     );
-    const esc = (v: string) => `"${v.replace(/"/g, '""')}"`;
-    const csv = rows.map((r) => r.map(esc).join(",")).join("\n");
+    const esc = (v: string) =>
+      `"${v.replace(/"/g, '""').replace(/\r\n|\r|\n/g, " ")}"`;
+    const csv = "\uFEFF" + rows.map((r) => r.map(esc).join(",")).join("\n");
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
     const url = URL.createObjectURL(blob);
     const a = document.createElement("a");

@@ -8,6 +8,7 @@ import com.project.api.web.dto.NoticeRequest;
 import com.project.api.web.dto.NoticeResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -19,19 +20,21 @@ public class NoticeService {
 
     private final NoticeRepository noticeRepository;
 
-    public Page<NoticeListItemResponse> listPublic(Pageable pageable) {
-        return noticeRepository.findAllByOrderByPinnedDescCreatedAtDesc(pageable)
+    public Page<NoticeListItemResponse> listPublic(String keyword, Boolean pinned, Pageable pageable) {
+        String kw = keyword == null ? "" : keyword.trim();
+        return noticeRepository.search(kw, pinned, pageable)
                 .map(NoticeListItemResponse::from);
     }
 
     public NoticeResponse getPublic(Long id) {
         Notice n = noticeRepository.findById(id)
                 .orElseThrow(() -> new NotFoundException("Notice not found: " + id));
-        return NoticeResponse.from(n);
+        return NoticeResponse.from(n, toNavItem(previousOf(n)), toNavItem(nextOf(n)));
     }
 
-    public Page<NoticeListItemResponse> listAdmin(Pageable pageable) {
-        return noticeRepository.findAllByOrderByPinnedDescCreatedAtDesc(pageable)
+    public Page<NoticeListItemResponse> listAdmin(String keyword, Boolean pinned, Pageable pageable) {
+        String kw = keyword == null ? "" : keyword.trim();
+        return noticeRepository.search(kw, pinned, pageable)
                 .map(NoticeListItemResponse::from);
     }
 
@@ -63,5 +66,31 @@ public class NoticeService {
             throw new NotFoundException("Notice not found: " + id);
         }
         noticeRepository.deleteById(id);
+    }
+
+    private Notice previousOf(Notice current) {
+        return noticeRepository.findPrevious(
+                current.isPinned(),
+                current.getCreatedAt(),
+                current.getId(),
+                PageRequest.of(0, 1)
+        ).stream().findFirst().orElse(null);
+    }
+
+    private Notice nextOf(Notice current) {
+        return noticeRepository.findNext(
+                current.isPinned(),
+                current.getCreatedAt(),
+                current.getId(),
+                PageRequest.of(0, 1)
+        ).stream().findFirst().orElse(null);
+    }
+
+    private NoticeResponse.NoticeNavItem toNavItem(Notice n) {
+        if (n == null) return null;
+        return NoticeResponse.NoticeNavItem.builder()
+                .id(n.getId())
+                .title(n.getTitle())
+                .build();
     }
 }

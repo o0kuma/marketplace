@@ -4,6 +4,7 @@ import com.project.api.domain.Category;
 import com.project.api.repository.CategoryRepository;
 import com.project.api.repository.ProductRepository;
 import com.project.api.web.NotFoundException;
+import com.project.api.web.dto.AdminCategoryListItemResponse;
 import com.project.api.web.dto.CategoryResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -23,6 +24,19 @@ public class CategoryService {
     public List<CategoryResponse> list() {
         return categoryRepository.findAllByOrderByNameAsc().stream()
                 .map(CategoryResponse::from)
+                .collect(Collectors.toList());
+    }
+
+    public List<AdminCategoryListItemResponse> listForAdmin(String keyword, Boolean hasProducts) {
+        String kw = keyword == null ? "" : keyword.trim().toLowerCase();
+        return categoryRepository.findAllByOrderByNameAsc().stream()
+                .map(c -> AdminCategoryListItemResponse.builder()
+                        .id(c.getId())
+                        .name(c.getName())
+                        .productCount(productRepository.countByCategory_Id(c.getId()))
+                        .build())
+                .filter(c -> kw.isEmpty() || c.getName().toLowerCase().contains(kw))
+                .filter(c -> hasProducts == null || (hasProducts ? c.getProductCount() > 0 : c.getProductCount() == 0))
                 .collect(Collectors.toList());
     }
 

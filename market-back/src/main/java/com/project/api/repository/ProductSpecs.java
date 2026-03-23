@@ -35,8 +35,13 @@ public final class ProductSpecs {
         };
     }
 
-    /** Admin list: optional includeDeleted, status, categoryId, keyword. */
-    public static Specification<Product> forAdmin(Boolean includeDeleted, ProductStatus statusFilter, Long categoryId, String keyword) {
+    /** Admin list: optional includeDeleted, status, categoryId, keyword, sellerId. */
+    public static Specification<Product> forAdmin(
+            Boolean includeDeleted,
+            ProductStatus statusFilter,
+            Long categoryId,
+            String keyword,
+            Long sellerId) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (Boolean.FALSE.equals(includeDeleted)) {
@@ -50,6 +55,9 @@ public final class ProductSpecs {
             }
             if (keyword != null && !keyword.isBlank()) {
                 predicates.add(cb.like(cb.lower(root.get("name")), "%" + keyword.trim().toLowerCase() + "%"));
+            }
+            if (sellerId != null) {
+                predicates.add(cb.equal(root.get("seller").get("id"), sellerId));
             }
             return cb.and(predicates.toArray(new Predicate[0]));
         };

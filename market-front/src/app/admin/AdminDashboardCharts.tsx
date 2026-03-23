@@ -18,7 +18,7 @@ export function OrdersBarChart({ data }: { data: DailyTrendPoint[] }) {
   const h = 120;
   return (
     <div className="w-full overflow-x-auto">
-      <div className="flex min-w-[320px] items-end gap-1" style={{ height: h + 28 }}>
+      <div className="flex min-w-[320px] items-end gap-1" style={{ height: h + 37 }}>
         {data.map((p) => {
           const barH = Math.round((p.orderCount / max) * h);
           return (

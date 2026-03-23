@@ -20,6 +20,8 @@ public class NoticeResponse {
     private boolean pinned;
     private LocalDateTime createdAt;
     private LocalDateTime updatedAt;
+    private NoticeNavItem prevNotice;
+    private NoticeNavItem nextNotice;
 
     public static NoticeResponse from(Notice n) {
         return NoticeResponse.builder()
@@ -30,6 +32,28 @@ public class NoticeResponse {
                 .createdAt(n.getCreatedAt())
                 .updatedAt(n.getUpdatedAt())
                 .build();
+    }
+
+    public static NoticeResponse from(Notice n, NoticeNavItem prev, NoticeNavItem next) {
+        return NoticeResponse.builder()
+                .id(n.getId())
+                .title(n.getTitle())
+                .content(n.getContent())
+                .pinned(n.isPinned())
+                .createdAt(n.getCreatedAt())
+                .updatedAt(n.getUpdatedAt())
+                .prevNotice(prev)
+                .nextNotice(next)
+                .build();
+    }
+
+    @Getter
+    @NoArgsConstructor
+    @AllArgsConstructor
+    @Builder
+    public static class NoticeNavItem {
+        private Long id;
+        private String title;
     }
 
 }

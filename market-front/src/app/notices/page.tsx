@@ -17,6 +17,8 @@ interface NoticeItem {
 export default function NoticesPage() {
   const [data, setData] = useState<PageResponse<NoticeItem> | null>(null);
   const [page, setPage] = useState(0);
+  const [keyword, setKeyword] = useState("");
+  const [pinnedFilter, setPinnedFilter] = useState<"" | "true" | "false">("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -24,8 +26,11 @@ export default function NoticesPage() {
     setLoading(true);
     setError("");
     try {
+      const params: Record<string, string> = { page: String(page), size: "15" };
+      if (keyword.trim()) params.keyword = keyword.trim();
+      if (pinnedFilter) params.pinned = pinnedFilter;
       const res = await api<PageResponse<NoticeItem>>("/notices", {
-        params: { page: String(page), size: "15" },
+        params,
       });
       setData(res);
     } catch (e) {
@@ -34,7 +39,7 @@ export default function NoticesPage() {
     } finally {
       setLoading(false);
     }
-  }, [page]);
+  }, [page, keyword, pinnedFilter]);
 
   useEffect(() => {
     load();
@@ -45,28 +50,68 @@ export default function NoticesPage() {
   return (
     <div>
       <h1 className="section-title">공지사항</h1>
+      <div className="mt-4 flex flex-wrap items-center gap-2">
+        <input
+          type="search"
+          value={keyword}
+          onChange={(e) => {
+            setKeyword(e.target.value);
+            setPage(0);
+          }}
+          placeholder="제목 검색"
+          className="input-field w-64"
+        />
+        <select
+          value={pinnedFilter}
+          onChange={(e) => {
+            setPinnedFilter(e.target.value as "" | "true" | "false");
+            setPage(0);
+          }}
+          className="input-field w-auto"
+        >
+          <option value="">전체</option>
+          <option value="true">고정 공지만</option>
+          <option value="false">일반 공지만</option>
+        </select>
+      </div>
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
       {!data?.content.length && !error ? (
         <p className="mt-6 text-zinc-600">등록된 공지가 없습니다.</p>
       ) : (
-        <ul className="mt-6 divide-y divide-zinc-200 rounded-xl border border-zinc-200 bg-white">
-          {data?.content.map((n) => (
-            <li key={n.id}>
-              <Link
-                href={`/notices/${n.id}`}
-                className="flex flex-wrap items-center gap-2 px-4 py-4 hover:bg-zinc-50"
-              >
-                {n.pinned && (
-                  <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">고정</span>
-                )}
-                <span className="flex-1 font-medium text-zinc-900">{n.title}</span>
-                <time className="text-sm text-zinc-500" dateTime={n.createdAt}>
-                  {new Date(n.createdAt).toLocaleDateString("ko-KR")}
-                </time>
-              </Link>
-            </li>
-          ))}
-        </ul>
+        <div className="mt-6 overflow-x-auto rounded-xl border border-zinc-200 bg-white">
+          <table className="w-full border-collapse text-sm">
+            <thead className="bg-zinc-50">
+              <tr>
+                <th className="border-b border-zinc-200 px-3 py-2 text-left">번호</th>
+                <th className="border-b border-zinc-200 px-3 py-2 text-left">제목</th>
+                <th className="border-b border-zinc-200 px-3 py-2 text-left">구분</th>
+                <th className="border-b border-zinc-200 px-3 py-2 text-left">등록일</th>
+              </tr>
+            </thead>
+            <tbody>
+              {data?.content.map((n) => (
+                <tr key={n.id} className="border-t border-zinc-100 hover:bg-zinc-50">
+                  <td className="px-3 py-3 text-zinc-700">{n.id}</td>
+                  <td className="px-3 py-3">
+                    <Link href={`/notices/${n.id}`} className="font-medium text-zinc-900 hover:underline">
+                      {n.title}
+                    </Link>
+                  </td>
+                  <td className="px-3 py-3">
+                    {n.pinned ? (
+                      <span className="rounded bg-amber-100 px-2 py-0.5 text-xs font-medium text-amber-800">고정</span>
+                    ) : (
+                      <span className="text-zinc-500">일반</span>
+                    )}
+                  </td>
+                  <td className="px-3 py-3 text-zinc-600">
+                    {new Date(n.createdAt).toLocaleDateString("ko-KR")}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       )}
       {data && data.totalPages > 1 && (
         <div className="mt-6 flex items-center justify-center gap-2">

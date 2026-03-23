@@ -391,9 +391,15 @@ public class ProductService {
         product.markDeleted();
     }
 
-    /** Admin: list all products with optional filters (includeDeleted, status, categoryId, keyword). */
-    public Page<ProductResponse> listForAdmin(Boolean includeDeleted, ProductStatus status, Long categoryId, String keyword, Pageable pageable) {
-        Specification<Product> spec = ProductSpecs.forAdmin(includeDeleted, status, categoryId, keyword);
+    /** Admin: list all products with optional filters (includeDeleted, status, categoryId, keyword, sellerId). */
+    public Page<ProductResponse> listForAdmin(
+            Boolean includeDeleted,
+            ProductStatus status,
+            Long categoryId,
+            String keyword,
+            Long sellerId,
+            Pageable pageable) {
+        Specification<Product> spec = ProductSpecs.forAdmin(includeDeleted, status, categoryId, keyword, sellerId);
         return productRepository.findAll(spec, pageable).map(ProductResponse::from);
     }
 

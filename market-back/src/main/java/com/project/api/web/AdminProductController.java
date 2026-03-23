@@ -30,9 +30,10 @@ public class AdminProductController {
             @RequestParam(defaultValue = "true") boolean includeDeleted,
             @RequestParam(required = false) ProductStatus status,
             @RequestParam(required = false) Long categoryId,
-            @RequestParam(required = false) String keyword) {
+            @RequestParam(required = false) String keyword,
+            @RequestParam(required = false) Long sellerId) {
         Pageable pageable = PageRequest.of(page, size);
-        return PageResponse.of(productService.listForAdmin(includeDeleted, status, categoryId, keyword, pageable));
+        return PageResponse.of(productService.listForAdmin(includeDeleted, status, categoryId, keyword, sellerId, pageable));
     }
 
     @PatchMapping("/{id}/status")

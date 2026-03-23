@@ -27,4 +27,6 @@ public interface ProductRepository extends JpaRepository<Product, Long>, JpaSpec
             ProductStatus excluded, String name, Pageable pageable);
 
     java.util.List<Product> findByCategory_Id(Long categoryId);
+
+    long countByCategory_Id(Long categoryId);
 }
