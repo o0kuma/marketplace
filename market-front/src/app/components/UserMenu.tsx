@@ -17,11 +17,11 @@ function initialsFromName(name: string): string {
 function roleLabel(role: MemberRole): string {
   switch (role) {
     case "SELLER":
-      return "판매자";
+      return "Seller";
     case "ADMIN":
-      return "관리자";
+      return "Admin";
     default:
-      return "회원";
+      return "Member";
   }
 }
 
@@ -108,7 +108,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
               onClick={close}
               className="block px-4 py-2.5 text-sm font-medium text-[var(--market-text)] hover:bg-[var(--market-accent-subtle)]"
             >
-              프로필 · 계정
+              My page
             </Link>
             {user.role === "SELLER" && (
               <Link
@@ -119,7 +119,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
                   sellerActive ? "text-[var(--market-accent)]" : "text-[var(--market-text)]"
                 }`}
               >
-                판매자 센터
+                Seller hub
               </Link>
             )}
             {user.role === "ADMIN" && (
@@ -131,7 +131,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
                   adminActive ? "text-[var(--market-accent)]" : "text-[var(--market-text)]"
                 }`}
               >
-                관리자 콘솔
+                Admin console
               </Link>
             )}
           </div>
@@ -146,7 +146,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
               }}
               className="w-full px-4 py-2.5 text-left text-sm font-medium text-[var(--market-text-muted)] hover:bg-[var(--market-accent-subtle)] hover:text-[var(--market-text)]"
             >
-              로그아웃
+              Log out
             </button>
           </div>
         </div>

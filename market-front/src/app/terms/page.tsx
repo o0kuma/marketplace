@@ -2,6 +2,7 @@
 
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { api } from "@/lib/api";
+import { sanitizeLegalHtml } from "@/lib/sanitizeLegalHtml";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 
@@ -17,7 +18,7 @@ export default function TermsPage() {
       try {
         const res = await api<{ content: string; updatedAt: string }>("/content/terms");
         if (!cancelled) {
-          setHtml(res.content);
+          setHtml(sanitizeLegalHtml(res.content));
           setUpdatedAt(res.updatedAt);
         }
       } catch (e) {

@@ -26,7 +26,7 @@ export default function MarketFooter() {
               </li>
               <li>
                 <Link href="/notices" className={linkClass}>
-                  Announcements
+                  Notices
                 </Link>
               </li>
             </ul>

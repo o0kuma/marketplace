@@ -1,7 +1,9 @@
 "use client";
 
+import LegalRichEditor from "@/app/components/LegalRichEditor";
 import LoadingSpinner from "@/app/components/LoadingSpinner";
 import { api } from "@/lib/api";
+import { isLegalHtmlEmpty, sanitizeLegalHtml } from "@/lib/sanitizeLegalHtml";
 import Link from "next/link";
 import { useCallback, useEffect, useState } from "react";
 
@@ -27,11 +29,11 @@ export default function AdminSiteDocumentsPage() {
     try {
       const map = await api<Record<string, DocBlock>>("/admin/site-documents");
       if (map.TERMS) {
-        setTerms(map.TERMS.content);
+        setTerms(sanitizeLegalHtml(map.TERMS.content));
         setTermsUpdated(map.TERMS.updatedAt);
       }
       if (map.PRIVACY) {
-        setPrivacy(map.PRIVACY.content);
+        setPrivacy(sanitizeLegalHtml(map.PRIVACY.content));
         setPrivacyUpdated(map.PRIVACY.updatedAt);
       }
     } catch (e) {
@@ -46,10 +48,15 @@ export default function AdminSiteDocumentsPage() {
   }, [load]);
 
   async function save(which: "TERMS" | "PRIVACY") {
-    const content = which === "TERMS" ? terms : privacy;
-    if (!content.trim()) {
+    const raw = which === "TERMS" ? terms : privacy;
+    const content = sanitizeLegalHtml(raw);
+    if (isLegalHtmlEmpty(content)) {
       setError("내용이 비어 있습니다.");
       return;
+    }
+    if (content !== raw) {
+      if (which === "TERMS") setTerms(content);
+      else setPrivacy(content);
     }
     setSaving(which);
     setError("");
@@ -59,8 +66,13 @@ export default function AdminSiteDocumentsPage() {
         method: "PUT",
         body: JSON.stringify({ content }),
       });
-      if (which === "TERMS") setTermsUpdated(res.updatedAt);
-      else setPrivacyUpdated(res.updatedAt);
+      if (which === "TERMS") {
+        setTermsUpdated(res.updatedAt);
+        setTerms(sanitizeLegalHtml(res.content));
+      } else {
+        setPrivacyUpdated(res.updatedAt);
+        setPrivacy(sanitizeLegalHtml(res.content));
+      }
       setOk(which === "TERMS" ? "이용약관이 저장되었습니다." : "개인정보처리방침이 저장되었습니다.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "저장 실패");
@@ -75,7 +87,7 @@ export default function AdminSiteDocumentsPage() {
     <div>
       <h1 className="section-title">약관 · 개인정보처리방침</h1>
       <p className="mt-2 text-sm text-zinc-500">
-        이용약관·개인정보 페이지에 노출되는 HTML입니다. 저장 후{" "}
+        아래 에디터로 작성한 내용이 HTML로 저장되어{" "}
         <Link href="/terms" className="underline" target="_blank">
           /terms
         </Link>
@@ -83,7 +95,7 @@ export default function AdminSiteDocumentsPage() {
         <Link href="/privacy" className="underline" target="_blank">
           /privacy
         </Link>
-        에서 확인하세요.
+        에 표시됩니다. 저장 시 스크립트 등 위험 태그는 자동으로 제거됩니다.
       </p>
       {error && <p className="mt-4 rounded-lg bg-red-50 px-4 py-3 text-sm text-red-800">{error}</p>}
       {ok && <p className="mt-4 rounded-lg bg-green-50 px-4 py-3 text-sm text-green-800">{ok}</p>}
@@ -93,17 +105,12 @@ export default function AdminSiteDocumentsPage() {
         {termsUpdated && (
           <p className="mt-1 text-xs text-zinc-500">마지막 수정: {new Date(termsUpdated).toLocaleString("ko-KR")}</p>
         )}
-        <textarea
-          value={terms}
-          onChange={(e) => setTerms(e.target.value)}
-          rows={14}
-          className="input mt-2 w-full font-mono text-sm"
-        />
+        <LegalRichEditor value={terms} onChange={setTerms} placeholder="이용약관 본문을 입력하세요…" />
         <button
           type="button"
           onClick={() => save("TERMS")}
           disabled={saving !== null}
-          className="btn-primary mt-2 disabled:opacity-50"
+          className="btn-primary mt-3 disabled:opacity-50"
         >
           {saving === "TERMS" ? "저장 중…" : "이용약관 저장"}
         </button>
@@ -114,17 +121,12 @@ export default function AdminSiteDocumentsPage() {
         {privacyUpdated && (
           <p className="mt-1 text-xs text-zinc-500">마지막 수정: {new Date(privacyUpdated).toLocaleString("ko-KR")}</p>
         )}
-        <textarea
-          value={privacy}
-          onChange={(e) => setPrivacy(e.target.value)}
-          rows={14}
-          className="input mt-2 w-full font-mono text-sm"
-        />
+        <LegalRichEditor value={privacy} onChange={setPrivacy} placeholder="개인정보처리방침 본문을 입력하세요…" />
         <button
           type="button"
           onClick={() => save("PRIVACY")}
           disabled={saving !== null}
-          className="btn-primary mt-2 disabled:opacity-50"
+          className="btn-primary mt-3 disabled:opacity-50"
         >
           {saving === "PRIVACY" ? "저장 중…" : "개인정보처리방침 저장"}
         </button>

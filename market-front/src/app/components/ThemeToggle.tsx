@@ -82,9 +82,9 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
   }, [mode]);
 
   const label = useMemo(() => {
-    if (mode === "dark") return "다크 모드";
-    if (mode === "light") return "라이트 모드";
-    return "시스템 설정 따름";
+    if (mode === "dark") return "Dark mode";
+    if (mode === "light") return "Light mode";
+    return "Match system";
   }, [mode]);
 
   function cycleMode() {
@@ -98,8 +98,8 @@ export default function ThemeToggle({ className = "" }: { className?: string }) 
       type="button"
       onClick={cycleMode}
       className={`inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-[var(--market-border)] bg-[var(--market-surface)] text-[var(--market-text-muted)] transition hover:border-[var(--market-accent)] hover:text-[var(--market-accent)] focus-visible:outline focus-visible:ring-2 focus-visible:ring-[var(--market-accent)] focus-visible:ring-offset-2 ${className}`}
-      title={`테마: ${label} (클릭하여 변경)`}
-      aria-label={`테마 변경, 현재 ${label}`}
+      title={`Theme: ${label} (click to cycle)`}
+      aria-label={`Change theme, currently ${label}`}
     >
       {mode === "light" ? <SunIcon className={iconClass} /> : mode === "dark" ? <MoonIcon className={iconClass} /> : <SystemIcon className={iconClass} />}
     </button>

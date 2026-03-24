@@ -22,7 +22,7 @@ export default function SearchTopBar() {
           <span className="text-[var(--market-text-muted)]">…</span>
         ) : user ? (
           <Link href="/mypage" className="text-[var(--market-text-muted)] hover:text-[var(--market-text)]">
-            My Page
+            My page
           </Link>
         ) : (
           <>

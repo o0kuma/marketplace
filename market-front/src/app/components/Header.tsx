@@ -72,7 +72,7 @@ export default function Header() {
   return (
     <header id="site-header" className="market-glass-bar sticky top-0 z-50 border-b border-[var(--market-border)] shadow-sm">
       <div className="border-b border-white/20 bg-gradient-to-r from-[var(--market-dark)] via-[var(--market-accent)] to-[var(--market-secondary)] px-4 py-2 text-center text-xs font-medium tracking-wide text-white/95 sm:text-sm">
-        일정 금액 이상 무료 배송 · 판매자 모집 · 다양한 상품을 만나 보세요
+        Free shipping on qualifying orders · Seller onboarding · Discover products you&apos;ll love
       </div>
       <div className="market-container flex flex-col gap-4 py-4 lg:flex-row lg:items-center lg:justify-between lg:gap-8">
         <div className="flex items-center justify-between gap-6 lg:justify-start">
@@ -88,32 +88,32 @@ export default function Header() {
                 type="search"
                 value={searchQ}
                 onChange={(e) => setSearchQ(e.target.value)}
-                placeholder="상품명 검색"
+                placeholder="Search products"
                 className="min-w-0 flex-1 border-0 bg-transparent px-4 py-2.5 text-sm text-[var(--market-text)] placeholder:text-[var(--market-text-muted)] focus:outline-none focus:ring-0"
-                aria-label="상품 검색"
+                aria-label="Search products"
               />
               <button
                 type="submit"
                 className="shrink-0 bg-[var(--market-accent)] px-5 py-2.5 text-sm font-semibold text-white transition hover:bg-[var(--market-accent-hover)]"
               >
-                검색
+                Search
               </button>
             </div>
           </form>
         </div>
         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:gap-x-7 lg:justify-end">
           <Link href="/products" className={navClass(pathname, "/products")}>
-            쇼핑
+            Shop
           </Link>
           <Link href="/notices" className={navClass(pathname, "/notices")}>
-            공지
+            Notices
           </Link>
           {loading ? (
             <span className="text-sm text-[var(--market-text-muted)]">…</span>
           ) : user ? (
             <>
               <Link href="/cart" className={`relative ${navClass(pathname, "/cart")}`}>
-                장바구니
+                Cart
                 {cartCount > 0 && (
                   <span className="absolute -right-2 -top-1 flex h-5 min-w-5 items-center justify-center rounded-full bg-[var(--market-accent)] px-1 text-[10px] font-bold text-white">
                     {cartCount > 99 ? "99+" : cartCount}
@@ -121,13 +121,13 @@ export default function Header() {
                 )}
               </Link>
               <Link href="/notifications" className={`relative ${navClass(pathname, "/notifications")}`}>
-                알림
+                Notifications
                 {notificationCount > 0 && (
                   <span className="absolute -right-2 -top-1 h-2 w-2 rounded-full bg-[var(--market-secondary)] ring-2 ring-white" />
                 )}
               </Link>
               <Link href="/orders" className={navClass(pathname, "/orders")}>
-                주문
+                Orders
               </Link>
               <ThemeToggle />
               <UserMenu profileImageUrl={user.profileImageUrl} />
@@ -157,11 +157,12 @@ export default function Header() {
             type="search"
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
-            placeholder="상품명 검색"
+            placeholder="Search products"
             className="min-w-0 flex-1 border-0 bg-transparent px-4 py-2 text-sm text-[var(--market-text)] placeholder:text-[var(--market-text-muted)] focus:outline-none"
+            aria-label="Search products"
           />
           <button type="submit" className="bg-[var(--market-accent)] px-4 py-2 text-sm font-medium text-white">
-            검색
+            Search
           </button>
         </div>
       </form>

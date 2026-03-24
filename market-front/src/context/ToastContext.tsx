@@ -36,7 +36,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ toasts, show, remove }}>
       {children}
-      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2" role="region" aria-label="알림">
+      <div className="fixed bottom-4 right-4 z-50 flex flex-col gap-2" role="region" aria-label="Notifications">
         {toasts.map((t) => (
           <div
             key={t.id}
@@ -54,7 +54,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
               type="button"
               onClick={() => remove(t.id)}
               className="ml-2 text-[var(--market-text-muted)] hover:text-[var(--market-text)]"
-              aria-label="닫기"
+              aria-label="Dismiss"
             >
               ×
             </button>
