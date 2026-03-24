@@ -43,7 +43,7 @@ function ResetPasswordForm() {
 
   if (success) {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+      <div className="mx-auto max-w-md rounded-2xl border border-[var(--market-border)] bg-[var(--market-surface)] p-8 shadow-sm">
         <h1 className="text-xl font-semibold text-stone-900">비밀번호가 변경되었습니다</h1>
         <p className="mt-4 text-sm text-stone-600">새 비밀번호로 로그인해 주세요.</p>
         <Link href="/login" className="btn-primary mt-6 inline-block">
@@ -55,7 +55,7 @@ function ResetPasswordForm() {
 
   if (!token) {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+      <div className="mx-auto max-w-md rounded-2xl border border-[var(--market-border)] bg-[var(--market-surface)] p-8 shadow-sm">
         <h1 className="text-xl font-semibold text-stone-900">잘못된 링크</h1>
         <p className="mt-4 text-sm text-stone-600">
           유효하지 않거나 만료된 링크입니다. 비밀번호 찾기에서 다시 요청해 주세요.
@@ -68,7 +68,7 @@ function ResetPasswordForm() {
   }
 
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+    <div className="mx-auto max-w-md rounded-2xl border border-[var(--market-border)] bg-[var(--market-surface)] p-8 shadow-sm">
       <h1 className="text-xl font-semibold text-stone-900">새 비밀번호 설정</h1>
       <p className="mt-2 text-sm text-stone-500">새 비밀번호를 입력해 주세요. (4자 이상)</p>
       <form onSubmit={handleSubmit} className="mt-6 flex flex-col gap-4">

@@ -150,16 +150,16 @@ function SearchPageContent() {
   const hasMore = results.length < totalCount && totalCount > 0;
 
   return (
-    <div className="flex h-[calc(100vh-3.5rem)] min-h-[480px] flex-col bg-white lg:flex-row">
-      <aside className="flex max-h-[40vh] w-full shrink-0 flex-col border-b border-zinc-200 bg-zinc-50/90 lg:max-h-none lg:w-[min(100%,280px)] lg:border-b-0 lg:border-r">
-        <div className="border-b border-zinc-200 p-4">
+    <div className="flex h-[calc(100vh-3.5rem)] min-h-[480px] flex-col bg-[var(--market-surface)] lg:flex-row">
+      <aside className="flex max-h-[40vh] w-full shrink-0 flex-col border-b border-[var(--market-border)] bg-zinc-50/90 lg:max-h-none lg:w-[min(100%,280px)] lg:border-b-0 lg:border-r">
+        <div className="border-b border-[var(--market-border)] p-4">
           <form onSubmit={onSubmit} className="relative">
             <input
               type="search"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="키워드, 제목…"
-              className="w-full rounded-full border border-zinc-200 bg-white py-2.5 pl-4 pr-20 text-sm text-zinc-900 shadow-sm outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
+              className="w-full rounded-full border border-[var(--market-border)] bg-[var(--market-surface)] py-2.5 pl-4 pr-20 text-sm text-[var(--market-text)] shadow-sm outline-none focus:border-teal-600 focus:ring-1 focus:ring-teal-600"
               aria-label="논문 검색"
             />
             <button
@@ -181,7 +181,7 @@ function SearchPageContent() {
                     setQuery(prompt);
                     runSearch(prompt);
                   }}
-                  className="w-full rounded-lg border border-zinc-100 bg-white p-3 text-left text-sm leading-snug text-zinc-700 shadow-sm transition hover:border-teal-200 hover:bg-teal-50/50"
+                  className="w-full rounded-lg border border-[var(--market-border)] bg-[var(--market-surface)] p-3 text-left text-sm leading-snug text-zinc-700 shadow-sm transition hover:border-teal-200 hover:bg-teal-50/50"
                 >
                   {prompt}
                 </button>
@@ -189,7 +189,7 @@ function SearchPageContent() {
             ))}
           </ul>
         </div>
-        <div className="shrink-0 border-t border-zinc-200 p-4">
+        <div className="shrink-0 border-t border-[var(--market-border)] p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-zinc-500">히스토리</p>
           <ul className="mt-2 max-h-32 space-y-1 overflow-y-auto text-sm lg:max-h-36">
             {history.length === 0 ? (
@@ -214,8 +214,8 @@ function SearchPageContent() {
         </div>
       </aside>
 
-      <section className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-zinc-200 bg-white lg:border-b-0 lg:border-r">
-        <div className="shrink-0 border-b border-zinc-100 px-4 py-3">
+      <section className="flex min-h-0 min-w-0 flex-1 flex-col border-b border-[var(--market-border)] bg-[var(--market-surface)] lg:border-b-0 lg:border-r">
+        <div className="shrink-0 border-b border-[var(--market-border)] px-4 py-3">
           <h2 className="flex flex-wrap items-center gap-2 text-sm font-semibold text-zinc-900">
             <span className="inline-flex h-6 w-6 items-center justify-center rounded bg-zinc-100 text-xs" aria-hidden>
               🔍
@@ -341,7 +341,7 @@ function SearchPageContent() {
             목록에서 논문을 선택하면 초록이 표시됩니다.
           </div>
         )}
-        <p className="shrink-0 border-t border-zinc-200 bg-white px-4 py-2 text-center text-[10px] text-zinc-400">
+        <p className="shrink-0 border-t border-[var(--market-border)] bg-[var(--market-surface)] px-4 py-2 text-center text-[10px] text-zinc-400">
           메타데이터 제공:{" "}
           <a href="https://openalex.org" target="_blank" rel="noopener noreferrer" className="text-teal-700 underline">
             OpenAlex
@@ -350,7 +350,7 @@ function SearchPageContent() {
       </section>
 
       {selected && (
-        <section className="max-h-[50vh] min-h-[200px] overflow-y-auto border-t border-zinc-200 bg-zinc-50/60 lg:hidden">
+        <section className="max-h-[50vh] min-h-[200px] overflow-y-auto border-t border-[var(--market-border)] bg-zinc-50/60 lg:hidden">
           <PaperDetail paper={selected} compact />
         </section>
       )}
@@ -400,7 +400,7 @@ function PaperDetail({ paper, compact }: { paper: PaperSearchResult; compact?: b
   const doiUrl = paper.doi ? `https://doi.org/${paper.doi}` : `https://openalex.org/${paper.id}`;
   return (
     <div className={`flex flex-col overflow-y-auto ${compact ? "p-4" : "h-full"}`}>
-      <div className={`shrink-0 border-b border-zinc-200 bg-white shadow-sm ${compact ? "p-4" : "p-6"}`}>
+      <div className={`shrink-0 border-b border-[var(--market-border)] bg-[var(--market-surface)] shadow-sm ${compact ? "p-4" : "p-6"}`}>
         <h1
           className={`font-bold leading-snug text-zinc-900 ${compact ? "text-base" : "text-xl lg:text-2xl"}`}
         >
@@ -450,7 +450,7 @@ export default function SearchPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-[calc(100vh-3.5rem)] items-center justify-center bg-white text-zinc-500">
+        <div className="flex h-[calc(100vh-3.5rem)] items-center justify-center bg-[var(--market-surface)] text-zinc-500">
           로딩 중…
         </div>
       }

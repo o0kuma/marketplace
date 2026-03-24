@@ -219,12 +219,12 @@ export default function PaperCitationGraph({ workId, onSelectNode }: Props) {
   };
 
   return (
-    <div ref={wrapRef} className="relative min-h-[420px] w-full flex-1 overflow-hidden rounded-lg border border-stone-200 bg-stone-100/80">
+    <div ref={wrapRef} className="relative min-h-[420px] w-full flex-1 overflow-hidden rounded-lg border border-[var(--market-border)] bg-stone-100/80">
       <p className="absolute left-3 top-2 z-10 max-w-[min(100%,220px)] text-[11px] leading-snug text-stone-600">
         노드 크기 ≈ 인용 수 · 색 = 연도(옅은 틸=오래됨, 진한 틸=최근) · 보라 테두리 = 기준 논문
       </p>
 
-      <div className="pointer-events-none absolute bottom-3 right-3 z-10 rounded-md border border-stone-300 bg-white/95 px-2.5 py-2 shadow-sm">
+      <div className="pointer-events-none absolute bottom-3 right-3 z-10 rounded-md border border-[var(--market-border)] bg-[var(--market-surface)] px-2.5 py-2 shadow-sm">
         <p className="mb-1 text-center text-[9px] font-semibold uppercase tracking-wide text-stone-500">출판 연도</p>
         <div className="h-3 w-36 rounded-sm border border-stone-200" style={legendStyle} />
         <div className="mt-1 flex justify-between font-mono text-[10px] text-stone-600">

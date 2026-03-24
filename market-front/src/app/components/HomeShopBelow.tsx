@@ -44,7 +44,7 @@ export default function HomeShopBelow({ categories, products }: Props) {
               <Link
                 key={c.id}
                 href={`/products?categoryId=${c.id}`}
-                className="rounded-full border border-stone-200 bg-white px-4 py-2 text-sm font-medium text-stone-700 shadow-sm transition hover:border-teal-700 hover:text-teal-800"
+                className="rounded-full border border-[var(--market-border)] bg-[var(--market-surface)] px-4 py-2 text-sm font-medium text-stone-700 shadow-sm transition hover:border-teal-700 hover:text-teal-800"
               >
                 {c.name}
               </Link>
@@ -93,7 +93,7 @@ export default function HomeShopBelow({ categories, products }: Props) {
             ))}
           </ul>
         ) : (
-          <div className="rounded-3xl border border-dashed border-stone-200 bg-white px-8 py-16 text-center shadow-sm">
+          <div className="rounded-3xl border border-dashed border-[var(--market-border)] bg-[var(--market-surface)] px-8 py-16 text-center shadow-sm">
             <p className="text-lg font-medium text-stone-800">We&apos;re stocking the shelves</p>
             <p className="mt-2 text-sm text-stone-500">Check back soon or become a seller.</p>
             <div className="mt-8 flex flex-wrap justify-center gap-3">

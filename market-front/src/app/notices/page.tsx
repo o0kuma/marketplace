@@ -78,7 +78,7 @@ export default function NoticesPage() {
       {!data?.content.length && !error ? (
         <p className="mt-6 text-zinc-600">등록된 공지가 없습니다.</p>
       ) : (
-        <div className="mt-6 overflow-x-auto rounded-xl border border-zinc-200 bg-white">
+        <div className="mt-6 overflow-x-auto rounded-xl border border-[var(--market-border)] bg-[var(--market-surface)]">
           <table className="w-full border-collapse text-sm">
             <thead className="bg-zinc-50">
               <tr>

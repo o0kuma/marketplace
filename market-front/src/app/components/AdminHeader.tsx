@@ -23,7 +23,6 @@ export default function AdminHeader() {
           Admin
         </Link>
         <nav className="flex flex-wrap items-center gap-3 sm:gap-5">
-          <ThemeToggle />
           <Link href="/admin" className={navClass(pathname, "/admin", true)}>
             Dashboard
           </Link>
@@ -57,6 +56,7 @@ export default function AdminHeader() {
               </button>
             </>
           )}
+          <ThemeToggle className="border-white/25 bg-white/10 text-white hover:border-white/50 hover:text-white focus-visible:ring-white/70 focus-visible:ring-offset-0" />
         </nav>
       </div>
     </header>

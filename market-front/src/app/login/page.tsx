@@ -36,7 +36,7 @@ function LoginForm() {
   }
 
   return (
-    <div className="grid min-h-[70vh] overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-xl lg:grid-cols-2">
+    <div className="grid min-h-[70vh] overflow-hidden rounded-3xl border border-[var(--market-border)] bg-[var(--market-surface)] shadow-xl lg:grid-cols-2">
       <div className="hidden flex-col justify-center bg-gradient-to-br from-teal-950 via-stone-900 to-stone-950 p-12 text-white lg:flex">
         <p className="text-xs font-semibold uppercase tracking-[0.3em] text-teal-300">Open Market</p>
         <h2 className="mt-4 text-3xl font-semibold leading-tight">Welcome back</h2>

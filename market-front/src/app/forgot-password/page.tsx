@@ -29,7 +29,7 @@ export default function ForgotPasswordPage() {
 
   if (sent) {
     return (
-      <div className="mx-auto max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+      <div className="mx-auto max-w-md rounded-2xl border border-[var(--market-border)] bg-[var(--market-surface)] p-8 shadow-sm">
         <h1 className="text-xl font-semibold text-stone-900">이메일 발송 완료</h1>
         <p className="mt-4 text-sm text-stone-600">
           등록된 이메일로 비밀번호 재설정 링크를 보냈습니다. 이메일을 확인한 뒤 링크를 클릭하여 새 비밀번호를 설정해 주세요.
@@ -43,7 +43,7 @@ export default function ForgotPasswordPage() {
   }
 
   return (
-    <div className="mx-auto max-w-md rounded-2xl border border-stone-200 bg-white p-8 shadow-sm">
+    <div className="mx-auto max-w-md rounded-2xl border border-[var(--market-border)] bg-[var(--market-surface)] p-8 shadow-sm">
       <h1 className="text-xl font-semibold text-stone-900">비밀번호 찾기</h1>
       <p className="mt-2 text-sm text-stone-500">
         가입 시 사용한 이메일을 입력하면 비밀번호 재설정 링크를 보내드립니다.

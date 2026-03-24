@@ -302,10 +302,10 @@ export default function NewProductPage() {
                   </span>
                   <div className="absolute right-1 top-1 flex gap-1 opacity-0 group-hover:opacity-100 transition">
                     {index > 0 && (
-                      <button type="button" onClick={() => moveImage(index, -1)} className="rounded bg-white/90 p-1 text-xs shadow" title="앞으로">←</button>
+                      <button type="button" onClick={() => moveImage(index, -1)} className="rounded bg-[var(--market-surface)] p-1 text-xs shadow" title="앞으로">←</button>
                     )}
                     {index < imageUrls.length - 1 && (
-                      <button type="button" onClick={() => moveImage(index, 1)} className="rounded bg-white/90 p-1 text-xs shadow" title="뒤로">→</button>
+                      <button type="button" onClick={() => moveImage(index, 1)} className="rounded bg-[var(--market-surface)] p-1 text-xs shadow" title="뒤로">→</button>
                     )}
                     <button type="button" onClick={() => removeImage(index)} className="rounded bg-red-500 p-1 text-xs text-white shadow" title="삭제">×</button>
                   </div>
@@ -383,7 +383,7 @@ export default function NewProductPage() {
                 </button>
               </div>
               {optionGroups.map((g, gi) => (
-                <div key={gi} className="mb-4 rounded-lg border border-zinc-200 bg-white p-3">
+                <div key={gi} className="mb-4 rounded-lg border border-[var(--market-border)] bg-[var(--market-surface)] p-3">
                   <div className="flex flex-wrap items-center gap-2">
                     <input
                       type="text"

@@ -97,12 +97,12 @@ main:focus {
 
 /* Secondary — outline */
 .btn-secondary {
-  @apply inline-flex items-center justify-center rounded-full border border-[var(--market-border)] bg-white px-5 py-2.5 text-sm font-medium text-[var(--market-text)] transition hover:border-[var(--market-accent)] hover:bg-[var(--market-accent-subtle)] focus-visible:outline focus-visible:ring-2 focus-visible:ring-[var(--market-accent)] focus-visible:ring-offset-2 disabled:opacity-50;
+  @apply inline-flex items-center justify-center rounded-full border border-[var(--market-border)] bg-[var(--market-surface)] px-5 py-2.5 text-sm font-medium text-[var(--market-text)] transition hover:border-[var(--market-accent)] hover:bg-[var(--market-accent-subtle)] focus-visible:outline focus-visible:ring-2 focus-visible:ring-[var(--market-accent)] focus-visible:ring-offset-2 disabled:opacity-50;
 }
 
 .input-field,
 .input {
-  @apply w-full rounded-xl border border-[var(--market-border)] bg-white px-4 py-3 text-sm text-[var(--market-text)] placeholder:text-[var(--market-text-muted)] transition focus:border-[var(--market-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--market-accent-subtle)];
+  @apply w-full rounded-xl border border-[var(--market-border)] bg-[var(--market-surface)] px-4 py-3 text-sm text-[var(--market-text)] placeholder:text-[var(--market-text-muted)] transition focus:border-[var(--market-accent)] focus:outline-none focus:ring-2 focus:ring-[var(--market-accent-subtle)];
 }
 
 .badge-brand {
@@ -122,35 +122,49 @@ main:focus {
 }
 
 .empty-state {
-  @apply rounded-2xl border border-dashed border-[var(--market-border)] bg-white/60 py-16 text-center text-[var(--market-text-muted)];
+  @apply rounded-2xl border border-dashed border-[var(--market-border)] py-16 text-center text-[var(--market-text-muted)];
+  background-color: color-mix(in srgb, var(--market-surface) 72%, transparent);
+}
+
+/* Sticky header / footer frosted bar — works in light & dark */
+.market-glass-bar {
+  background-color: color-mix(in srgb, var(--market-surface) 88%, transparent);
+  -webkit-backdrop-filter: blur(12px);
+  backdrop-filter: blur(12px);
 }
 
 /* Admin list pages — shared table chrome */
 .admin-table-wrap {
-  @apply overflow-auto rounded-xl border border-zinc-200 bg-white;
+  @apply overflow-auto rounded-xl border border-[var(--market-border)] bg-[var(--market-surface)];
 }
 .admin-table {
   @apply min-w-full border-collapse text-sm;
 }
 .admin-table thead {
-  @apply bg-zinc-50 text-zinc-600;
+  background: color-mix(in srgb, var(--market-border) 28%, var(--market-surface));
+  color: var(--market-text-muted);
 }
 .admin-table th {
-  @apply border-b border-zinc-200 px-3 py-2 align-middle text-sm font-medium;
+  @apply border-b px-3 py-2 align-middle text-sm font-medium;
+  border-bottom-color: var(--market-border);
 }
 .admin-table td {
   @apply px-3 py-2 align-middle;
 }
 .admin-table tbody tr {
-  @apply border-t border-zinc-100;
+  @apply border-t;
+  border-top-color: var(--market-border);
 }
 .admin-table tbody tr.row-muted {
-  @apply bg-red-50/50;
+  background-color: color-mix(in srgb, rgb(254 242 242) 55%, var(--market-surface));
+}
+html[data-theme="dark"] .admin-table tbody tr.row-muted {
+  background-color: rgba(248, 113, 113, 0.14) !important;
 }
 
 /* Product grid card — add `group` on element for group-hover children */
 .market-product-card {
-  @apply block overflow-hidden rounded-2xl bg-white transition duration-300;
+  @apply block overflow-hidden rounded-2xl bg-[var(--market-surface)] transition duration-300;
   box-shadow: var(--shadow-market);
 }
 .market-product-card:hover {
@@ -160,7 +174,7 @@ main:focus {
 
 /* Sticky checkout summary */
 .market-sticky-summary {
-  @apply rounded-2xl border border-[var(--market-border)] bg-white p-6 lg:sticky lg:top-28;
+  @apply rounded-2xl border border-[var(--market-border)] bg-[var(--market-surface)] p-6 lg:sticky lg:top-28;
   box-shadow: var(--shadow-market);
 }
 
@@ -247,4 +261,99 @@ html[data-theme="dark"] .prose :where(h1, h2, h3, h4, strong) {
 }
 html[data-theme="dark"] .prose a {
   color: var(--market-accent);
+}
+
+/* Zinc-300 borders (buttons, chips) */
+html[data-theme="dark"] .border-zinc-300 {
+  border-color: var(--market-border) !important;
+}
+
+/* Teal / stone accents on paper search & badges */
+html[data-theme="dark"] .border-teal-200 {
+  border-color: rgba(45, 212, 191, 0.35) !important;
+}
+html[data-theme="dark"] .text-teal-800 {
+  color: #99f6e4 !important;
+}
+html[data-theme="dark"] .text-teal-900 {
+  color: #ccfbf1 !important;
+}
+html[data-theme="dark"] .text-teal-700 {
+  color: #5eead4 !important;
+}
+html[data-theme="dark"] .bg-teal-50 {
+  background-color: rgba(45, 212, 191, 0.14) !important;
+}
+html[data-theme="dark"] .bg-teal-50\/50 {
+  background-color: rgba(45, 212, 191, 0.1) !important;
+}
+html[data-theme="dark"] .bg-teal-100 {
+  background-color: rgba(45, 212, 191, 0.2) !important;
+}
+html[data-theme="dark"] .hover\:bg-teal-50:hover {
+  background-color: rgba(45, 212, 191, 0.12) !important;
+}
+html[data-theme="dark"] .hover\:bg-white\/20:hover {
+  background-color: rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Semantic alert surfaces */
+html[data-theme="dark"] .bg-red-50 {
+  background-color: rgba(248, 113, 113, 0.16) !important;
+}
+html[data-theme="dark"] .bg-red-50\/50 {
+  background-color: rgba(248, 113, 113, 0.1) !important;
+}
+html[data-theme="dark"] .bg-amber-50 {
+  background-color: rgba(251, 191, 36, 0.14) !important;
+}
+html[data-theme="dark"] .bg-amber-50\/50 {
+  background-color: rgba(251, 191, 36, 0.1) !important;
+}
+html[data-theme="dark"] .bg-amber-100 {
+  background-color: rgba(251, 191, 36, 0.22) !important;
+}
+html[data-theme="dark"] .bg-stone-100 {
+  background-color: rgba(255, 255, 255, 0.06) !important;
+}
+html[data-theme="dark"] .bg-stone-100\/80 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .bg-green-50 {
+  background-color: rgba(74, 222, 128, 0.14) !important;
+}
+html[data-theme="dark"] .text-red-800 {
+  color: #fecaca !important;
+}
+html[data-theme="dark"] .text-amber-800 {
+  color: #fde68a !important;
+}
+html[data-theme="dark"] .text-green-800 {
+  color: #bbf7d0 !important;
+}
+html[data-theme="dark"] .border-red-200 {
+  border-color: rgba(248, 113, 113, 0.35) !important;
+}
+html[data-theme="dark"] .border-amber-200 {
+  border-color: rgba(251, 191, 36, 0.35) !important;
+}
+html[data-theme="dark"] .border-green-200 {
+  border-color: rgba(74, 222, 128, 0.35) !important;
+}
+html[data-theme="dark"] .hover\:bg-red-50:hover {
+  background-color: rgba(248, 113, 113, 0.14) !important;
+}
+html[data-theme="dark"] .hover\:bg-amber-50:hover {
+  background-color: rgba(251, 191, 36, 0.12) !important;
+}
+
+/* List row highlights (paper search, etc.) */
+html[data-theme="dark"] .bg-zinc-100 {
+  background-color: rgba(255, 255, 255, 0.07) !important;
+}
+html[data-theme="dark"] .bg-zinc-100\/90 {
+  background-color: rgba(255, 255, 255, 0.08) !important;
+}
+html[data-theme="dark"] .hover\:bg-zinc-200\/60:hover {
+  background-color: rgba(255, 255, 255, 0.1) !important;
 }

@@ -48,7 +48,7 @@ export default function SignupPage() {
 
   return (
     <div className="mx-auto max-w-5xl">
-      <div className="grid min-h-[72vh] overflow-hidden rounded-3xl border border-stone-200 bg-white shadow-xl lg:grid-cols-5">
+      <div className="grid min-h-[72vh] overflow-hidden rounded-3xl border border-[var(--market-border)] bg-[var(--market-surface)] shadow-xl lg:grid-cols-5">
         <div className="hidden flex-col justify-center bg-gradient-to-br from-teal-950 to-stone-900 p-10 text-white lg:col-span-2 lg:flex">
           <p className="text-xs font-semibold uppercase tracking-[0.3em] text-teal-300">Join us</p>
           <h2 className="mt-4 text-2xl font-semibold">Create your account</h2>
@@ -88,7 +88,7 @@ export default function SignupPage() {
                 <option value="SELLER">Seller</option>
               </select>
             </label>
-            <label className="flex items-start gap-3 rounded-xl border border-stone-100 bg-stone-50/80 p-4">
+            <label className="flex items-start gap-3 rounded-xl border border-[var(--market-border)] bg-stone-50/80 p-4">
               <input type="checkbox" checked={termsAgreed} onChange={(e) => setTermsAgreed(e.target.checked)} className="mt-0.5 h-4 w-4 rounded border-stone-300 text-teal-800" />
               <span className="text-sm text-stone-600">
                 I agree to the{" "}

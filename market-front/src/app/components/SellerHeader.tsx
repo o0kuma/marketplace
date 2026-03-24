@@ -18,13 +18,12 @@ export default function SellerHeader() {
   const { user, logout } = useAuth();
 
   return (
-    <header className="sticky top-0 z-40 border-b border-[var(--market-border)] bg-white/95 shadow-sm backdrop-blur-md">
+    <header className="market-glass-bar sticky top-0 z-40 border-b border-[var(--market-border)] shadow-sm">
       <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-4 px-4 py-3.5 sm:px-6 lg:px-8">
         <Link href="/seller" className="text-lg font-semibold tracking-tight text-[var(--market-text)]">
           Seller <span className="text-[var(--market-accent)]">Hub</span>
         </Link>
         <nav className="flex flex-wrap items-center gap-4 sm:gap-5">
-          <ThemeToggle />
           <Link href="/seller" className={navLinkClass(pathname, "/seller")}>
             Dashboard
           </Link>
@@ -55,6 +54,7 @@ export default function SellerHeader() {
               </button>
             </>
           )}
+          <ThemeToggle />
         </nav>
       </div>
     </header>

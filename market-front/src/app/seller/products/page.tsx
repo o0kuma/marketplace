@@ -319,7 +319,7 @@ export default function SellerProductsPage() {
       ) : (
         <>
           {viewMode === "table" ? (
-            <div className="overflow-auto rounded-xl border border-zinc-200 bg-white">
+            <div className="admin-table-wrap">
               <table className="min-w-full text-sm">
                 <thead className="bg-zinc-50 text-zinc-600">
                   <tr>
@@ -477,7 +477,7 @@ export default function SellerProductsPage() {
                   key={pageNum}
                   type="button"
                   onClick={() => setPage(pageNum)}
-                  className={`min-w-9 rounded-lg px-2.5 py-1.5 text-sm font-medium ${currentPage === pageNum ? "bg-zinc-900 text-white" : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"}`}
+                  className={`min-w-9 rounded-lg px-2.5 py-1.5 text-sm font-medium ${currentPage === pageNum ? "bg-zinc-900 text-white" : "border border-[var(--market-border)] bg-[var(--market-surface)] text-[var(--market-text)] hover:bg-[var(--market-accent-subtle)]"}`}
                 >
                   {pageNum + 1}
                 </button>

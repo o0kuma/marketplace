@@ -70,7 +70,7 @@ export default function Header() {
   }
 
   return (
-    <header id="site-header" className="sticky top-0 z-50 border-b border-[var(--market-border)] bg-white/90 shadow-sm backdrop-blur-md">
+    <header id="site-header" className="market-glass-bar sticky top-0 z-50 border-b border-[var(--market-border)] shadow-sm">
       <div className="border-b border-white/20 bg-gradient-to-r from-[var(--market-dark)] via-[var(--market-accent)] to-[var(--market-secondary)] px-4 py-2 text-center text-xs font-medium tracking-wide text-white/95 sm:text-sm">
         일정 금액 이상 무료 배송 · 판매자 모집 · 다양한 상품을 만나 보세요
       </div>
@@ -83,7 +83,7 @@ export default function Header() {
             onSubmit={onSearch}
             className={`hidden max-w-md flex-1 md:block lg:max-w-lg ${showProductSearch ? "" : "md:hidden"}`}
           >
-            <div className="flex overflow-hidden rounded-full border border-[var(--market-border)] bg-white shadow-inner">
+            <div className="flex overflow-hidden rounded-full border border-[var(--market-border)] bg-[var(--market-surface)] shadow-inner">
               <input
                 type="search"
                 value={searchQ}
@@ -102,7 +102,6 @@ export default function Header() {
           </form>
         </div>
         <nav className="flex flex-wrap items-center justify-center gap-x-5 gap-y-2 sm:gap-x-7 lg:justify-end">
-          <ThemeToggle />
           <Link href="/products" className={navClass(pathname, "/products")}>
             쇼핑
           </Link>
@@ -130,6 +129,7 @@ export default function Header() {
               <Link href="/orders" className={navClass(pathname, "/orders")}>
                 주문
               </Link>
+              <ThemeToggle />
               <UserMenu profileImageUrl={user.profileImageUrl} />
             </>
           ) : (
@@ -143,6 +143,7 @@ export default function Header() {
               >
                 회원가입
               </Link>
+              <ThemeToggle />
             </>
           )}
         </nav>
@@ -151,13 +152,13 @@ export default function Header() {
         onSubmit={onSearch}
         className={`market-container pb-3 md:hidden ${showProductSearch ? "" : "hidden"}`}
       >
-        <div className="flex overflow-hidden rounded-full border border-[var(--market-border)] bg-white">
+        <div className="flex overflow-hidden rounded-full border border-[var(--market-border)] bg-[var(--market-surface)]">
           <input
             type="search"
             value={searchQ}
             onChange={(e) => setSearchQ(e.target.value)}
             placeholder="상품명 검색"
-            className="min-w-0 flex-1 border-0 bg-transparent px-4 py-2 text-sm focus:outline-none"
+            className="min-w-0 flex-1 border-0 bg-transparent px-4 py-2 text-sm text-[var(--market-text)] placeholder:text-[var(--market-text-muted)] focus:outline-none"
           />
           <button type="submit" className="bg-[var(--market-accent)] px-4 py-2 text-sm font-medium text-white">
             검색

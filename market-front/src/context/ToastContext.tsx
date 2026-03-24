@@ -46,14 +46,14 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 ? "border-red-200 bg-red-50 text-red-800"
                 : t.type === "success"
                   ? "border-green-200 bg-green-50 text-green-800"
-                  : "border-zinc-200 bg-white text-zinc-800"
+                  : "border-[var(--market-border)] bg-[var(--market-surface)] text-[var(--market-text)]"
             }`}
           >
             <span className="text-sm">{t.message}</span>
             <button
               type="button"
               onClick={() => remove(t.id)}
-              className="ml-2 text-zinc-500 hover:text-zinc-700"
+              className="ml-2 text-[var(--market-text-muted)] hover:text-[var(--market-text)]"
               aria-label="닫기"
             >
               ×

@@ -351,12 +351,12 @@ export default function EditProductPage() {
                   </span>
                   <div className="absolute right-1 top-1 flex gap-1 opacity-0 group-hover:opacity-100 transition">
                     {index > 0 && (
-                      <button type="button" onClick={() => moveImage(index, -1)} className="rounded bg-white/90 p-1 text-xs shadow" title="앞으로">
+                      <button type="button" onClick={() => moveImage(index, -1)} className="rounded bg-[var(--market-surface)] p-1 text-xs shadow" title="앞으로">
                         ←
                       </button>
                     )}
                     {index < imageUrls.length - 1 && (
-                      <button type="button" onClick={() => moveImage(index, 1)} className="rounded bg-white/90 p-1 text-xs shadow" title="뒤로">
+                      <button type="button" onClick={() => moveImage(index, 1)} className="rounded bg-[var(--market-surface)] p-1 text-xs shadow" title="뒤로">
                         →
                       </button>
                     )}

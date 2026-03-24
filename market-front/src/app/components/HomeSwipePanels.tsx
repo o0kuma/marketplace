@@ -110,7 +110,7 @@ export default function HomeSwipePanels({ onRevealShopBelow, onBackToPaperPanel 
                     value={paperQuery}
                     onChange={(e) => setPaperQuery(e.target.value)}
                     placeholder="bio, CRISPR, LLM …"
-                    className="min-h-[48px] flex-1 rounded-xl border-0 bg-white/95 px-4 py-2.5 text-base text-stone-900 outline-none focus:ring-2 focus:ring-teal-500"
+                    className="min-h-[48px] flex-1 rounded-xl border-0 bg-[var(--market-surface)] px-4 py-2.5 text-base text-[var(--market-text)] outline-none focus:ring-2 focus:ring-teal-500"
                     aria-label="논문 검색"
                   />
                   <button
@@ -158,7 +158,7 @@ export default function HomeSwipePanels({ onRevealShopBelow, onBackToPaperPanel 
             <div className="mt-6 flex flex-wrap justify-center gap-3">
               <Link
                 href="/products"
-                className="rounded-full bg-white px-6 py-2.5 text-sm font-semibold text-stone-900 shadow-lg hover:bg-teal-50"
+                className="rounded-full bg-[var(--market-surface)] px-6 py-2.5 text-sm font-semibold text-[var(--market-text)] shadow-lg hover:bg-[var(--market-accent-subtle)]"
               >
                 Shop all
               </Link>

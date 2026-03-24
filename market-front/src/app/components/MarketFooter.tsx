@@ -7,7 +7,7 @@ const linkClass = "text-sm text-[var(--market-text-muted)] transition hover:text
 
 export default function MarketFooter() {
   return (
-    <footer className="mt-auto border-t border-[var(--market-border)] bg-white/90 backdrop-blur">
+    <footer className="market-glass-bar mt-auto border-t border-[var(--market-border)]">
       <div className="market-container py-14">
         <div className="grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
           <div>

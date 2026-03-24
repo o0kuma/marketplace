@@ -408,7 +408,7 @@ export default function SellerOrdersPage() {
                   key={pageNum}
                   type="button"
                   onClick={() => setPage(pageNum)}
-                  className={`min-w-9 rounded-lg px-2.5 py-1.5 text-sm font-medium ${currentPage === pageNum ? "bg-zinc-900 text-white" : "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50"}`}
+                  className={`min-w-9 rounded-lg px-2.5 py-1.5 text-sm font-medium ${currentPage === pageNum ? "bg-zinc-900 text-white" : "border border-[var(--market-border)] bg-[var(--market-surface)] text-[var(--market-text)] hover:bg-[var(--market-accent-subtle)]"}`}
                 >
                   {pageNum + 1}
                 </button>

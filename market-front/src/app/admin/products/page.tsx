@@ -284,7 +284,7 @@ export default function AdminProductsPage() {
           ) : null}
           {sellerSuggestOpen && sellerSuggestions.length > 0 ? (
             <ul
-              className="absolute left-0 top-full z-20 mt-1 max-h-56 w-full min-w-[240px] overflow-auto rounded-lg border border-zinc-200 bg-white py-1 shadow-lg"
+              className="absolute left-0 top-full z-20 mt-1 max-h-56 w-full min-w-[240px] overflow-auto rounded-lg border border-[var(--market-border)] bg-[var(--market-surface)] py-1 shadow-lg"
               role="listbox"
             >
               {sellerSuggestions.map((m) => (

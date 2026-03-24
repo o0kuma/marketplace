@@ -91,7 +91,7 @@ export default function UserMenu({ profileImageUrl }: UserMenuProps) {
           id={menuId}
           role="menu"
           aria-labelledby="user-menu-trigger"
-          className="absolute right-0 z-[60] mt-2 w-72 origin-top-right rounded-xl border border-[var(--market-border)] bg-white py-2 shadow-lg ring-1 ring-[var(--market-border)]"
+          className="absolute right-0 z-[60] mt-2 w-72 origin-top-right rounded-xl border border-[var(--market-border)] bg-[var(--market-surface)] py-2 shadow-lg ring-1 ring-[var(--market-border)]"
         >
           <div className="border-b border-[var(--market-border)] px-4 py-3">
             <p className="truncate text-sm font-semibold text-[var(--market-text)]">{user.name}</p>

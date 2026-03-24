@@ -66,7 +66,7 @@ export default function WishlistButton({
           router.push("/login");
         }}
         aria-label="찜하기 (로그인 필요)"
-        className={`inline-flex items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-500 hover:bg-zinc-50 ${variant === "compact" ? "h-8 w-8" : "h-10 w-10"} ${className}`}
+        className={`inline-flex items-center justify-center rounded-full border border-[var(--market-border)] bg-[var(--market-surface)] text-[var(--market-text-muted)] hover:bg-[var(--market-accent-subtle)] ${variant === "compact" ? "h-8 w-8" : "h-10 w-10"} ${className}`}
       >
         <HeartIcon filled={false} className={variant === "compact" ? "h-4 w-4" : "h-5 w-5"} />
       </button>
@@ -79,7 +79,7 @@ export default function WishlistButton({
       onClick={toggle}
       disabled={loading}
       aria-label={inWishlist ? "찜 해제" : "찜하기"}
-      className={`inline-flex items-center justify-center rounded-full border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-50 disabled:opacity-50 ${variant === "compact" ? "h-8 w-8" : "h-10 w-10"} ${inWishlist ? "border-red-200 text-red-500 hover:bg-red-50" : ""} ${className}`}
+      className={`inline-flex items-center justify-center rounded-full border border-[var(--market-border)] bg-[var(--market-surface)] text-[var(--market-text)] hover:bg-[var(--market-accent-subtle)] disabled:opacity-50 ${variant === "compact" ? "h-8 w-8" : "h-10 w-10"} ${inWishlist ? "border-red-200 text-red-500 hover:bg-red-50" : ""} ${className}`}
     >
       <HeartIcon filled={inWishlist} className={variant === "compact" ? "h-4 w-4" : "h-5 w-5"} />
     </button>
